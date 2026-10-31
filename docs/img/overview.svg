@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="2768" viewBox="0 0 1000 2768" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">
+<rect x="0" y="0" width="1000" height="2768" rx="0" fill="#ffffff"/>
+<rect x="36" y="36" width="52" height="26" rx="13" fill="#000000"/>
+<text x="48" y="54" font-size="14" fill="#ffffff" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">總覽</text>
+<text x="36" y="104" font-size="34" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">日語家教：一句話從送出到回來</text>
+<text x="36" y="149" font-size="17" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">AI 負責回覆日文、寫小提醒、判斷練習、速查；分段、讀音、語音、嘴型與存檔都由程式完成。</text>
+<rect x="36" y="177" width="16" height="16" rx="3" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+<text x="60" y="190" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">黑框 = AI 呼叫</text>
+<rect x="226" y="177" width="16" height="16" rx="3" fill="#ffffff" stroke="#9a9a9a" stroke-width="1.5"/>
+<text x="250" y="190" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">灰框 = 程式 / 資料</text>
+<rect x="416" y="177" width="16" height="16" rx="3" fill="#ffffff" stroke="#000000" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="440" y="190" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">虛線 = 只在條件成立時才發生</text>
+<rect x="36" y="217" width="928" height="326" rx="14" fill="#ffffff" stroke="#9a9a9a" stroke-width="1.5"/>
+<rect x="58" y="233" width="138.0" height="26" rx="13" fill="#dcdcdc"/>
+<text x="71" y="251" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">① 程式（手機）</text>
+<text x="208.0" y="252" font-size="18" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">送出一句話：組成請求</text>
+<text x="58" y="275" font-size="12" fill="#7a7a7a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">src/game/claudeBrain.ts · toApiMessages · userChatLine</text>
+<text x="58" y="312" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="312" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">使用者的話加上［情境］［模式］前綴，送出時就定下來，之後原樣重送（快取要用）。</text>
+<text x="58" y="336" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="336" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">請求視窗從上一個 win 標記開始，最多 39 行（CHAT_HISTORY_MAX）。</text>
+<text x="58" y="360" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="360" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">帶上人物的名字與人設；人設 key（pk）改變時，視窗從新的一行重新開始。</text>
+<text x="58" y="384" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="384" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">帶上服務順序 providers 與 ChatGPT 模型 openaiModel，再 POST /api/chat。</text>
+<rect x="58" y="399" width="884" height="102" rx="8" fill="#f3f3f3" stroke="#d4d4d4" stroke-width="1"/>
+<text x="72" y="421" font-size="13" fill="#1a1a1a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">{ "role": "Mugi", "mode": "teacher", "name": "…", "persona": "…",</text>
+<text x="72" y="441" font-size="13" fill="#1a1a1a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">  "providers": ["anthropic", "openai"], "openaiModel": "…",</text>
+<text x="72" y="461" font-size="13" fill="#1a1a1a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">  "messages": [ …視窗內的紀錄…,</text>
+<text x="72" y="481" font-size="13" fill="#1a1a1a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">    { "role": "user", "content": "［情境：晚上 8 點］［模式：日語老師］学校行きました" } ] }</text>
+<line x1="500" y1="545" x2="500" y2="558" stroke="#9a9a9a" stroke-width="2"/>
+<path d="M493,557 L507,557 L500,567 Z" fill="#9a9a9a"/>
+<rect x="36" y="569" width="928" height="306" rx="14" fill="#ffffff" stroke="#9a9a9a" stroke-width="1.5"/>
+<rect x="58" y="585" width="151.5" height="26" rx="13" fill="#dcdcdc"/>
+<text x="71" y="603" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">② 程式（伺服器）</text>
+<text x="221.5" y="604" font-size="18" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">守門、組服務、組出給 Claude 的請求</text>
+<text x="58" y="627" font-size="12" fill="#7a7a7a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">server/apiGuard.ts guardApi → server/claudeChat.ts handleChat</text>
+<text x="58" y="664" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="664" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">guardApi 檢查 Host、Origin、Sec-Fetch-Site 與 Content-Type；區網 IP 另需配對碼。</text>
+<text x="58" y="688" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="688" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">parseChatBody 檢查訊息數、字數（程式碼點）、角色與模式。</text>
+<text x="58" y="712" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="712" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">servicesFor 依 providers 組服務：Claude 要有金鑰、未達 MUGI_DAILY_USD，通過即保留額度（hold）。</text>
+<text x="58" y="736" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="736" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">沒有可用服務回 429（每日上限）或 503；通過後 takeChatSlot 限制每分鐘與同時數量。</text>
+<rect x="58" y="751" width="884" height="82" rx="8" fill="#f3f3f3" stroke="#d4d4d4" stroke-width="1"/>
+<text x="72" y="773" font-size="13" fill="#1a1a1a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">system:  [{ text: systemPrompt(role, persona, name), cache_control: ephemeral }]</text>
+<text x="72" y="793" font-size="13" fill="#1a1a1a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">output_config: { effort: "low", format: { type: "json_schema", schema: CHAT_REPLY_SCHEMA } }</text>
+<text x="72" y="813" font-size="13" fill="#1a1a1a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">messages: [ …穩定前段（快取點）…, 最新一句 + &lt;reminder&gt;格式細節&lt;/reminder&gt; ]</text>
+<line x1="500" y1="877" x2="500" y2="890" stroke="#9a9a9a" stroke-width="2"/>
+<path d="M493,889 L507,889 L500,899 Z" fill="#9a9a9a"/>
+<rect x="36" y="901" width="928" height="310" rx="14" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+<rect x="58" y="917" width="151.5" height="26" rx="13" fill="#000000"/>
+<text x="71" y="935" font-size="14" fill="#ffffff" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">③ AI 呼叫 1</text>
+<text x="221.5" y="936" font-size="18" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">串流回覆（Structured Outputs）</text>
+<text x="58" y="959" font-size="12" fill="#7a7a7a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">server/claudeChat.ts streamReply · server/llm/anthropicProvider.ts · server/llm/openaiProvider.ts</text>
+<text x="58" y="996" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="996" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">依 providers 的順序試：anthropicProvider 用 messages.stream；openaiProvider 用 Responses API，串流、store</text>
+<text x="80" y="1020" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif"> 關閉。</text>
+<text x="58" y="1044" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1044" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">格式由 CHAT_REPLY_SCHEMA 保證；ChatGPT 端轉成 strict json_schema（名稱 mugi_reply）。</text>
+<text x="58" y="1068" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1068" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">只有「還沒送出任何文字」且錯誤屬於 fallbackWorthy（額度、5xx、逾時、連線中斷）才換下一家。</text>
+<text x="58" y="1092" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1092" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">整段回覆 120 秒內要收完，否則中止。</text>
+<rect x="58" y="1107" width="884" height="62" rx="8" fill="#f3f3f3" stroke="#d4d4d4" stroke-width="1"/>
+<text x="72" y="1129" font-size="13" fill="#1a1a1a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">{"segments":[{"lang":"ja","text":"そうなんだ！楽しかった？","gloss":"這樣啊！好玩嗎？"}],</text>
+<text x="72" y="1149" font-size="13" fill="#1a1a1a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace"> "tip":"要說 &lt;ja&gt;学校に行きました&lt;/ja&gt;，去哪裡要用「に」喔。","tone":"happy"}</text>
+<line x1="500" y1="1213" x2="500" y2="1226" stroke="#9a9a9a" stroke-width="2"/>
+<path d="M493,1225 L507,1225 L500,1235 Z" fill="#9a9a9a"/>
+<rect x="36" y="1237" width="928" height="188" rx="14" fill="#ffffff" stroke="#9a9a9a" stroke-width="1.5"/>
+<rect x="58" y="1253" width="192.0" height="26" rx="13" fill="#dcdcdc"/>
+<text x="71" y="1271" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">④ 程式（伺服器→手機）</text>
+<text x="262.0" y="1272" font-size="18" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">串流轉送，邊收邊顯示</text>
+<text x="58" y="1295" font-size="12" fill="#7a7a7a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">server/claudeChat.ts handleChat（send）· src/game/replyJson.ts</text>
+<text x="58" y="1332" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1332" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">每個文字片段轉成一則 SSE：data: {"type":"delta","text":…}。</text>
+<text x="58" y="1356" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1356" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">手機用 parsePartialJson 與 readReplyValue 解析不完整的 JSON，段落與說明邊收邊出現。</text>
+<text x="58" y="1380" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1380" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">玩家離開（連線關閉）就中止上游串流；已用掉的額度照記。</text>
+<line x1="500" y1="1427" x2="500" y2="1440" stroke="#9a9a9a" stroke-width="2"/>
+<path d="M493,1439 L507,1439 L500,1449 Z" fill="#9a9a9a"/>
+<rect x="36" y="1451" width="928" height="212" rx="14" fill="#ffffff" stroke="#9a9a9a" stroke-width="1.5"/>
+<rect x="58" y="1467" width="151.5" height="26" rx="13" fill="#dcdcdc"/>
+<text x="71" y="1485" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">⑤ 程式（伺服器）</text>
+<text x="221.5" y="1486" font-size="18" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">收尾修正：讀音與小提醒</text>
+<text x="58" y="1509" font-size="12" fill="#7a7a7a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">server/replyFix.ts fixReplyJson · server/readings.ts fillReadings</text>
+<text x="58" y="1546" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1546" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">kuromoji 補上缺的讀音，只補缺的，已經有的不動。</text>
+<text x="58" y="1570" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1570" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">小提醒裡沒包好的日文自動包進 &lt;ja&gt;。</text>
+<text x="58" y="1594" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1594" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">done 事件帶回修好的 JSON、provider 與 model；小提醒不合格則標記 tipRewrite。</text>
+<text x="58" y="1618" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1618" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">花費依 CLAUDE_PRICES 估算後寫入用量紀錄（server/usage.ts）。</text>
+<line x1="500" y1="1665" x2="500" y2="1678" stroke="#9a9a9a" stroke-width="2"/>
+<path d="M493,1677 L507,1677 L500,1687 Z" fill="#9a9a9a"/>
+<rect x="36" y="1689" width="928" height="212" rx="14" fill="#ffffff" stroke="#9a9a9a" stroke-width="1.5"/>
+<rect x="58" y="1705" width="138.0" height="26" rx="13" fill="#dcdcdc"/>
+<text x="71" y="1723" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">⑥ 程式（手機）</text>
+<text x="208.0" y="1724" font-size="18" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">拆解、播放、換嘴型</text>
+<text x="58" y="1747" font-size="12" fill="#7a7a7a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">src/game/characterVoice.ts speakPlanFor · src/game/tts.ts · src/game/customArt.ts frameFor</text>
+<text x="58" y="1784" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1784" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">lang 為 ja 的段，依人物的聲音設定選語音（雲端或瀏覽器），送 /api/tts（ttsCache 快取）。</text>
+<text x="58" y="1808" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1808" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">語音回傳音節時間（X-TTS-Visemes），嘴型依時間換；人設圖片依嘴型用 frameFor 取圖。</text>
+<text x="58" y="1832" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1832" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">gloss 放在括號中文；漢字讀音顯示為振假名；tip 進小提醒泡泡與小提醒本。</text>
+<text x="58" y="1856" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="1856" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">tone 只保存，不影響聲音。</text>
+<line x1="500" y1="1903" x2="500" y2="1916" stroke="#9a9a9a" stroke-width="2"/>
+<path d="M493,1915 L507,1915 L500,1925 Z" fill="#9a9a9a"/>
+<rect x="36" y="1927" width="928" height="188" rx="14" fill="#ffffff" stroke="#000000" stroke-width="2" stroke-dasharray="7 5"/>
+<rect x="58" y="1943" width="205.5" height="26" rx="13" fill="#000000"/>
+<text x="71" y="1961" font-size="14" fill="#ffffff" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">⑦ AI 呼叫 2（條件）</text>
+<text x="275.5" y="1962" font-size="18" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">小提醒改寫</text>
+<text x="58" y="1985" font-size="12" fill="#7a7a7a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">server/replyFix.ts needsTipRewrite · server/claudeChat.ts handleFixTip</text>
+<text x="58" y="2022" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="2022" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">小提醒中日文以外的中文少於 CHINESE_PROSE_MIN（6 字）才改寫。</text>
+<text x="58" y="2046" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="2046" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">POST /api/chat/fix-tip，預設 claude-haiku-5-5，TIP_FIX_SCHEMA 保證 {tip}，10 秒逾時。</text>
+<text x="58" y="2070" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="2070" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">成功就替換聊天紀錄與小提醒本；失敗保留原樣。</text>
+<line x1="500" y1="2117" x2="500" y2="2130" stroke="#9a9a9a" stroke-width="2"/>
+<path d="M493,2129 L507,2129 L500,2139 Z" fill="#9a9a9a"/>
+<rect x="36" y="2141" width="928" height="164" rx="14" fill="#ffffff" stroke="#000000" stroke-width="2" stroke-dasharray="7 5"/>
+<rect x="58" y="2157" width="205.5" height="26" rx="13" fill="#000000"/>
+<text x="71" y="2175" font-size="14" fill="#ffffff" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">⑧ AI 呼叫 3（條件）</text>
+<text x="275.5" y="2176" font-size="18" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">判斷練習</text>
+<text x="58" y="2199" font-size="12" fill="#7a7a7a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">src/game/tipsJudge.ts · server/claudeChat.ts handleJudge</text>
+<text x="58" y="2236" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="2236" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">先在手機寬鬆比對（去讀音、統一全半形與大小寫、片假名轉平假名）；一樣就直接算對，0 次 AI。</text>
+<text x="58" y="2260" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="2260" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">比不出來才 POST /api/chat/judge，JUDGE_SCHEMA 保證 {ok, feedback}；連不到就算不一樣。</text>
+<line x1="500" y1="2307" x2="500" y2="2320" stroke="#9a9a9a" stroke-width="2"/>
+<path d="M493,2319 L507,2319 L500,2329 Z" fill="#9a9a9a"/>
+<rect x="36" y="2331" width="928" height="164" rx="14" fill="#ffffff" stroke="#000000" stroke-width="2" stroke-dasharray="7 5"/>
+<rect x="58" y="2347" width="205.5" height="26" rx="13" fill="#000000"/>
+<text x="71" y="2365" font-size="14" fill="#ffffff" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">⑨ AI 呼叫 4（條件）</text>
+<text x="275.5" y="2366" font-size="18" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">速查</text>
+<text x="58" y="2389" font-size="12" fill="#7a7a7a" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">server/claudeChat.ts handleLookup · LOOKUP_SCHEMA</text>
+<text x="58" y="2426" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="2426" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">使用者查詢時 POST /api/lookup，預設 claude-haiku-5-5、LOOKUP_SCHEMA 保證欄位，20 秒逾時。</text>
+<text x="58" y="2450" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="80" y="2450" font-size="15" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">每分鐘最多 LOOKUP_PER_MINUTE（20）次；伺服器用 kuromoji 補讀音，畫面顯示振假名與發音鈕。</text>
+<rect x="36" y="2523" width="454" height="175" rx="14" fill="#ffffff" stroke="#9a9a9a" stroke-width="1.5"/>
+<text x="56" y="2555" font-size="17" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">AI 呼叫次數</text>
+<text x="56" y="2585" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="76" y="2585" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">一般：1 次（依 providers 第一家成功）。</text>
+<text x="56" y="2613" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="76" y="2613" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">小提醒不合格：再 1 次（Haiku）。</text>
+<text x="56" y="2641" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="76" y="2641" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">判斷練習：本機比對命中為 0 次，否則 1 次。</text>
+<text x="56" y="2669" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="76" y="2669" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">速查：每查一次 1 次。</text>
+<rect x="510" y="2523" width="454" height="175" rx="14" fill="#ffffff" stroke="#9a9a9a" stroke-width="1.5"/>
+<text x="530" y="2555" font-size="17" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">為什麼這樣設計</text>
+<text x="530" y="2585" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="550" y="2585" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">金鑰與 ChatGPT token 只在伺服器；手機拿不到。</text>
+<text x="530" y="2613" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="550" y="2613" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">回覆格式交給 Schema 保證；讀音、語音、存檔由程式做。</text>
+<text x="530" y="2641" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="550" y="2641" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">備援只在送出文字前發生，兩家的文字不會接在一起。</text>
+<text x="530" y="2669" font-size="14" fill="#000000" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-weight="bold">・</text>
+<text x="550" y="2669" font-size="14" fill="#4d4d4d" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">不變的前段可快取，每句只算新的一句。</text>
+<text x="36" y="2728" font-size="14" fill="#7a7a7a" font-family="PingFang TC, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif">一句話向別人解釋：AI 只寫文字，程式負責分段、讀音、語音、嘴型與存檔。</text>
+</svg>

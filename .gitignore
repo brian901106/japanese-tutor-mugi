@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+.usage/
+.tts-cache/
+.tts-keep/
+*.log
+coverage
+voicevox_engine/
+.claude/

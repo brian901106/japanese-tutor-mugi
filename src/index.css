@@ -1,0 +1,88 @@
+:root {
+  --bg: #0f0f0f;
+  --ink: #e8e8e8;
+  --muted: #9a9a9a;
+  --accent: #ffffff;
+  --on-accent: #111111;
+  --panel: #1c1c1c;
+  --line: #2a2a2a;
+  /* the accent tints: black, white and translucent white only (a selected row, a pressed thumb, a glow) */
+  --accent-tint: rgba(255, 255, 255, 0.14); --accent-text: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.12); --accent-press: #d4d4d4; --accent-glow: rgba(255, 255, 255, 0.35);
+  color-scheme: dark;
+  font-family: -apple-system, 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+* { box-sizing: border-box; }
+/* Full-screen shell (iOS 主畫面 standalone + Safari): the page itself never scrolls or rubber-bands; only inner
+   lists scroll. No -webkit-fill-available / dvh here: in iOS standalone (black-translucent) those resolve to the
+   screen height minus the status bar, which left a blank strip at the bottom.
+   No `overflow: hidden` on html / body either: the root's overflow applies to the viewport, and iOS standalone then
+   clips all painting to its short layout viewport (912 − 68 = 844 px on an iPhone) — #root was 912 tall but its
+   bottom strip (chat bar included) was cut off. Nothing in-flow overflows (#root is fixed), so the page can't scroll;
+   viewport.ts also snaps any stray document scroll back to 0. */
+html { height: 100%; overscroll-behavior: none; -webkit-text-size-adjust: 100%; background: var(--bg); }
+body {
+  margin: 0; height: 100%; overscroll-behavior: none; background: var(--bg);
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation;
+}
+/* standalone: the document as tall as the screen (not the short layout viewport) */
+html.standalone, html.standalone body { height: var(--app-h, 100lvh); }
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+/* typing / copying must still work (chat box + history) */
+input, textarea, select, [contenteditable='true'] { user-select: text; -webkit-user-select: text; -webkit-touch-callout: default; }
+img { -webkit-user-drag: none; }
+canvas { touch-action: none; }
+
+/* App frame: phone-first (an iPhone, 420×912), centered column on desktop. Pinned to the viewport so the
+   iOS standalone window (black-translucent status bar, viewport-fit=cover) is filled edge to edge; the views pad
+   themselves with env(safe-area-inset-*). */
+#root {
+  position: fixed; top: 0; bottom: 0; left: 0; right: 0; margin: 0 auto; max-width: 480px;
+  overflow: hidden; overflow: clip; overscroll-behavior: none;
+}
+/* iOS standalone: the layout viewport (bottom: 0 / 100% / dvh) is short by the status-bar height while content is
+   drawn from y=0, so size the root from the real screen height instead (--app-h set in viewport.ts; lvh fallback). */
+html.standalone #root { bottom: auto; height: 100vh; height: 100lvh; height: var(--app-h, 100lvh); }
+
+/* Bottom sheets (ui/SettingsSections, LookupSheet, TipsSheet): the backdrop covers the view, the sheet slides up */
+.sheet-backdrop { position: absolute; inset: 0; z-index: 5; background: rgba(0, 0, 0, 0.4); display: flex; align-items: flex-end; }
+.sheet {
+  width: 100%; max-height: 62%; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 10px;
+  padding: 10px 12px calc(env(safe-area-inset-bottom) + 12px); border-radius: 20px 20px 0 0;
+  background: rgba(22, 22, 22, 0.98); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.5); animation: sheet-up 0.22s ease-out;
+}
+@keyframes sheet-up { from { transform: translateY(40px); opacity: 0; } }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px; }
+.sheet-head strong { font-size: 17px; }
+.sheet-close { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -4px 0; border-radius: 50%; font-size: 16px; color: var(--muted); }
+.sheet > .sheet-head { flex: none; }
+
+/* the 練習中 / 已學會 switch of 小提醒 (TipsSheet) */
+.tabs { display: flex; background: #262626; border-radius: 999px; padding: 3px; }
+.tabs button { padding: 8px 14px; border-radius: 999px; font-size: 14px; color: var(--muted); }
+.tabs button.on { background: #3a3a3a; color: var(--ink); font-weight: 600; }
+
+/* Range sliders (語速, 音調, 音量): custom track + 28px white thumb; appearance:none is required for the thumb size to apply */
+input[type='range'].slider {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 36px; margin: 0; padding: 0; background: transparent; cursor: pointer;
+  --f: 0.5; /* 0..1, set inline */
+}
+input[type='range'].slider:focus { outline: none; }
+input[type='range'].slider::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 3px; background: linear-gradient(to right, var(--accent) calc(14px + (100% - 28px) * var(--f)), var(--line) 0);
+}
+input[type='range'].slider::-moz-range-track { height: 6px; border-radius: 3px; background: var(--line); }
+input[type='range'].slider::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--accent); }
+input[type='range'].slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 28px; height: 28px; margin-top: -11px; border-radius: 50%;
+  background: var(--panel); border: 3px solid var(--accent); box-shadow: 0 2px 6px var(--accent-glow);
+}
+input[type='range'].slider::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--panel); border: 3px solid var(--accent); box-shadow: 0 2px 6px var(--accent-glow);
+}
+input[type='range'].slider:active::-webkit-slider-thumb { background: var(--accent-press); }
+input[type='range'].slider:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }

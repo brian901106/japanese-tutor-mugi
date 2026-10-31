@@ -1,0 +1,68 @@
+{
+ "size": 657,
+ "box": [
+  276,
+  308,
+  393,
+  403
+ ],
+ "feather": 10.0,
+ "ellipse": {
+  "cx": 395.0,
+  "cy": 413.0,
+  "rx": 62.0,
+  "ry": 50.0
+ },
+ "visemes": [
+  "a",
+  "e",
+  "i",
+  "o",
+  "u",
+  "m"
+ ],
+ "takes": [
+  1
+ ],
+ "faces": {},
+ "faceless": true,
+ "talkFaces": null,
+ "figure": {
+  "file": "body.webp",
+  "w": 657,
+  "h": 768,
+  "backdrop": false,
+  "portrait": {
+   "x": 0,
+   "y": 0,
+   "scale": 1.0
+  },
+  "poses": {
+   "idle": {
+    "file": "body.webp",
+    "w": 657,
+    "h": 768,
+    "backdrop": false,
+    "portrait": {
+     "x": 0,
+     "y": 0,
+     "scale": 1.0
+    }
+   },
+   "talk": null
+  }
+ },
+ "fit": {
+  "scale": 0.998,
+  "dx": -142.75,
+  "dy": 2.0,
+  "source": "open frame onto closed frame, mean colour difference"
+ },
+ "seamReport": {
+  "open": 20.23,
+  "closed": 0.48
+ },
+ "blend": {
+  "mask": "ellipse covering the open mouth, feathered, times the open frame's alpha (open) or the closed frame's (closed)"
+ }
+}

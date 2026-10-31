@@ -1,0 +1,170 @@
+/* Shared pieces of the tutor screen (ui/TutorView): the round icon buttons over the stage, the ⚙️ settings sheet,
+   the 小提醒 notebook (TipsSheet), the 速查 sheet (LookupSheet) and the 用量 panel (UsagePanel). The dark page
+   overrides them in tutor.css. */
+
+/* round icon buttons: ⚙️, ‹ and the 小提醒 / 速查 / 自由縮放 buttons */
+.as-icon {
+  flex: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; line-height: 1;
+  background: rgba(28, 28, 28, 0.82); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15); color: var(--ink);
+}
+
+/* ⚙️ with 自由視角 and the 小提醒筆記本 button stacked under it */
+/* only the ⚙️ takes part in the top bar's layout: the column below it hangs free, so the name keeps its place */
+/* above the sheet backdrop (z 5) so 自由視角 / ⚙️ / 筆記本 stay tappable while a sheet is open */
+.as-icon-col { flex: none; position: relative; z-index: 6; }
+.as-icon-under { position: absolute; top: calc(100% + 8px); left: 0; display: flex; flex-direction: column; gap: 8px; }
+.as-orbit-btn, .as-tips-btn { position: relative; display: flex; align-items: center; justify-content: center; }
+.as-orbit-btn.on { background: var(--accent); color: var(--on-accent); }
+.as-tips-badge {
+  position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  background: var(--accent); color: var(--on-accent); font-size: 11px; font-style: normal; line-height: 18px; text-align: center;
+}
+
+/* ⚙️ settings */
+.as-settings { max-height: 78%; }
+/* vertical scrolling only: a row a few px too wide must not let the sheet wobble sideways (overflow-y: auto alone makes x auto too) */
+.as-settings-body { min-height: 0; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; padding: 0 4px 4px; }
+.as-settings-body > * { min-width: 0; max-width: 100%; }
+.sheet.as-settings { overflow-x: hidden; overscroll-behavior-x: none; }
+.as-settings-body h3 { margin: 12px 0 4px; font-size: 12px; color: var(--muted); font-weight: 600; }
+.as-settings-body h3:first-child { margin-top: 0; }
+.as-row { display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 14px; }
+.as-row > span { flex: 1; display: flex; flex-direction: column; }
+.as-row > span small { color: var(--muted); font-size: 11px; line-height: 1.35; }
+.as-row input[type='checkbox'], .as-row input[type='radio'] { width: 20px; height: 20px; accent-color: var(--accent); }
+/* AI 模型 and 人設: a small group label, the persona text box and its footer */
+.as-model-group { margin: 8px 0 0; font-size: 12px; font-weight: 600; color: var(--muted); }
+.as-persona { width: 100%; box-sizing: border-box; margin: 4px 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 14px; line-height: 1.4; resize: vertical; background: var(--panel); color: inherit; }
+.as-persona-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+.as-persona-foot small { color: var(--muted); font-size: 12px; }
+.as-row input[type='range'] { flex: 0 0 55%; }
+.as-row em { font-style: normal; color: var(--muted); font-size: 13px; }
+.as-row select.as-voice { flex: 0 1 auto; max-width: 60%; min-width: 0; min-height: 44px; font-size: inherit; text-overflow: ellipsis; }
+.as-row .as-try { flex: 0 0 auto; min-height: 44px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: inherit; font: inherit; font-size: 13px; }
+.as-small { flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 44px; padding: 7px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); font-size: 13px; }
+.as-small:disabled { opacity: 0.4; }
+.as-small.danger { color: #e07f78; }
+.as-small.danger.on { background: #7a3b38; color: #f5f5f5; border-color: #7a3b38; }
+.as-small.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+/* html / body don't scroll while typing (only then: in iOS standalone `overflow: hidden` on the root clips painting to
+   the short layout viewport — covered by the keyboard at that time, see index.css) */
+html.kb-lock, html.kb-lock body { overflow: hidden; }
+
+/* two- / three-way choice in ⚙️ and 速查 */
+.as-seg { flex: none; display: flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.as-seg button { padding: 7px 10px; font-size: 13px; background: var(--panel); }
+.as-settings .as-seg button { min-height: 44px; }
+.as-seg button + button { border-left: 1px solid var(--line); }
+.as-seg button.on { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.as-seg button:disabled { opacity: 0.4; }
+/* the engine choice of one language: the three buttons share the row (a 320 px phone must not overflow) */
+.as-row.as-stack { flex-wrap: wrap; }
+.as-row.as-stack > .as-seg { flex: 1 1 100%; }
+.as-row.as-stack > .as-seg button { flex: 1 1 0; min-width: 0; padding: 7px 4px; white-space: nowrap; }
+/* four engines on a 320 px phone: smaller type so 「iPhone 內建」 fits its button */
+@media (max-width: 360px) { .as-row.as-stack > .as-seg button { font-size: 12px; padding: 7px 2px; letter-spacing: -0.02em; } }
+/* 中文 / 日文 groups in ⚙️ 聲音 */
+.as-lang { display: flex; flex-direction: column; gap: 2px; padding: 4px 0 8px; border-top: 1px dashed var(--line); }
+.as-lang h4 { margin: 6px 0 2px; font-size: 14px; color: var(--muted); font-weight: 600; }
+.as-lang-note { min-height: 0; }
+.as-lang-note small { display: block; color: var(--muted); font-size: 11px; line-height: 1.35; padding: 2px 0; }
+
+/* 小提醒筆記本 (ui/TipsSheet): at most ~55% of the screen so she stays visible above it */
+.as-tips { max-height: 55%; display: flex; flex-direction: column; }
+.as-tips .as-settings-body { flex: 1 1 auto; }
+.tip-tabs { margin: 4px 0 8px; }
+.tip-tabs button { flex: 1; }
+.tip-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.tip-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.tip-card.done { opacity: 0.8; }
+.tip-text { margin: 0; font-size: 14px; line-height: 1.5; }
+.tip-targets { display: flex; flex-wrap: wrap; gap: 6px; }
+.tip-target { padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); font-size: 18px; line-height: 1.3; text-align: left; }
+.tip-target.on { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.tip-said { color: var(--muted); font-size: 12px; }
+.tip-actions, .tip-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tip-foot { justify-content: space-between; color: var(--muted); font-size: 12px; }
+.tip-typed { display: flex; gap: 8px; }
+.tip-typed input { flex: 1; min-width: 0; height: 40px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--line); font: inherit; font-size: 15px; }
+.tip-live { color: var(--muted); font-size: 13px; }
+.tip-verdict { font-size: 13px; line-height: 1.5; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tip-verdict.ok { color: #7fc497; }
+.tip-verdict.ng { color: #e07f78; }
+.tip-empty { color: var(--muted); font-size: 13px; padding: 12px 4px; }
+
+/* 漢字の読み仮名 (ui/Furigana): the reading is small and sits above its kanji; the ruby line gets room for it */
+.tutor ruby { ruby-position: over; line-height: 2.1; }
+.tutor rt { font-size: 0.55em; line-height: 1; letter-spacing: 0; }
+
+/* 速查 (ui/LookupSheet): the round button under the lightbulb; dimmed while the Claude AI key is missing (the sheet explains) */
+.as-lookup-btn { display: flex; align-items: center; justify-content: center; }
+.as-lookup-btn.off { opacity: 0.55; }
+.as-lookup { max-height: 55%; }
+.lk-need { margin: 4px 0 0; padding: 8px 10px; border-radius: 10px; background: #262626; font-size: 13px; color: #e8e8e8; }
+.lk-form { display: flex; flex-direction: column; gap: 6px; margin: 6px 0 4px; }
+.lk-form input { width: 100%; box-sizing: border-box; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); font-size: 15px; }
+.lk-form-row { display: flex; align-items: center; gap: 8px; }
+.lk-form-row .as-small { flex: none; }
+.lk-lang button { padding: 4px 10px; font-size: 12px; }
+.lk-history-head { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 6px; }
+.lk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lk-entry { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 8px 36px 8px 12px; }
+/* ✕ on each history row (removes just that lookup), over the row's top-right corner */
+.lk-item { position: relative; }
+.lk-del {
+  position: absolute; top: 2px; right: 2px; z-index: 1; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
+  font-size: 13px; line-height: 1; color: var(--muted); background: transparent;
+}
+.lk-entry summary { cursor: pointer; list-style: none; }
+.lk-entry summary::-webkit-details-marker { display: none; }
+.lk-q { font-weight: 600; font-size: 14px; }
+.lk-answer, .lk-raw { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.lk-msg, .lk-raw { font-size: 14px; margin: 0; white-space: pre-wrap; }
+.lk-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lk-item-row { display: flex; flex-direction: column; gap: 3px; }
+.lk-ja-line { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.lk-ja { font-size: 17px; }
+.lk-ja ruby rt { font-size: 10px; }
+.lk-speak { flex: none; display: inline-flex; align-items: center; vertical-align: middle; border: none; background: transparent; font-size: 16px; padding: 2px 4px; }
+.lk-zh { font-size: 14px; }
+.lk-note { color: var(--muted); font-size: 12px; }
+.lk-h { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+.lk-badge {
+  display: inline-block; padding: 1px 6px; border-radius: 6px; font-size: 12px; background: #262626; color: #e8e8e8; white-space: nowrap;
+}
+.lk-badge[data-level="級外"] { background: #202020; color: #b5b5b5; }
+.lk-foot { display: block; margin: 8px 0 4px; color: var(--muted); font-size: 12px; }
+
+/* 用量 (ui/UsagePanel): the settings sheet's usage section */
+.usage-panel { display: flex; flex-direction: column; gap: 6px; padding: 2px 0 6px; }
+.usage-nav { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 14px; }
+.usage-nav-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.usage-h { margin: 8px 0 2px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.usage-row { display: flex; flex-direction: column; gap: 3px; padding: 4px 0; min-width: 0; }
+.usage-line { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; min-width: 0; }
+.usage-line span { min-width: 0; overflow-wrap: anywhere; }
+.usage-line b { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.usage-sub { color: var(--muted); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+.usage-note { color: var(--muted); font-size: 11px; line-height: 1.45; margin-top: 4px; }
+.usage-bar { height: 8px; border-radius: 999px; background: #2a2a2a; overflow: hidden; }
+.usage-bar i { display: block; height: 100%; background: var(--accent); border-radius: 999px; min-width: 0; }
+.usage-warn { color: #e07f78; font-size: 12px; line-height: 1.45; }
+
+/* AI 服務 (SettingsSections AiServiceSection): one row per service, its switch and 上移／下移, and the ChatGPT row's sign-in */
+.as-ai-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.as-ai-item { border-top: 1px solid var(--line); padding-top: 4px; }
+.as-ai-item .as-row { flex-wrap: wrap; }
+.as-ai-item .as-row > span { min-width: 0; }
+.as-ai-item .as-small { min-width: 44px; }
+.as-ai-switch { display: flex; align-items: center; gap: 6px; min-height: 44px; font-size: 13px; }
+.as-ai-switch input[type='checkbox'] { width: 22px; height: 22px; accent-color: var(--accent); }
+.as-ai-chatgpt { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 0 6px; }
+.as-ai-model { display: flex; align-items: center; gap: 8px; font-size: 13px; min-height: 44px; }
+.as-ai-model select { min-height: 44px; max-width: 60%; font-size: inherit; }
+.as-ai-hint { color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+/* a key field: its label on its own line, the input and the two buttons below it (a narrow phone squeezed the label into a column) */
+.as-key .as-row { flex-wrap: wrap; row-gap: 6px; }
+.as-key .as-row > span { flex: 1 0 100%; }
+.as-key .as-key-input { flex: 1; min-width: 0; }

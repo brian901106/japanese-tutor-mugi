@@ -1,0 +1,245 @@
+/* 日語家教 (ui/TutorView): a 2D portrait on top, the chat below. Reuses the chat / sheet classes of assistant.css; the
+   layout is its own; the chat bar is the shared dock (ChatBar.css). Safe areas and the on-screen keyboard (useIOSKeyboard) are respected. */
+/* the page is dark and calm (沉穩的黑, this page only). The variables the shared styles read are
+   set here, and the white surfaces of the shared chat bar, history and sheets are turned dark below (ChatBar.css, assistant.css).
+   The accent is white, and the text on it is near-black (--on-accent). */
+.tutor {
+  --bg: #0f0f0f; --ink: #e8e8e8; --muted: #9a9a9a; --accent: #ffffff; --on-accent: #111111; --panel: #1c1c1c; --line: #2a2a2a;
+  --accent-tint: rgba(255, 255, 255, 0.14); --accent-text: #ffffff;
+  position: fixed; inset: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+  background: linear-gradient(180deg, #141414 0%, #0f0f0f 100%); color: var(--ink); color-scheme: dark;
+  touch-action: manipulation; overscroll-behavior: none;
+}
+.tutor .as-icon, .tutor .as-input, .tutor .as-topic, .tutor .as-mic, .tutor .as-voice, .tutor .as-stt, .tutor .as-toggle,
+.tutor .as-voice-stop, .tutor .as-voice-pill, .tutor .as-mic-note, .tutor .as-small, .tutor .as-seg button,
+.tutor .tip-card, .tutor .tip-target, .tutor .lk-entry {
+  background: var(--panel); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line);
+}
+.tutor .as-voice.on { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+.tutor .as-history { background: rgba(20, 20, 20, 0.92); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }
+.tutor .as-history li.her { background: #262626; color: var(--ink); }
+.tutor .as-history li.her.tip { background: #2a2a2a; border-color: #5c5c5c; color: #e8e8e8; }
+.tutor .as-tip-label { color: #c8c8c8; }
+.tutor-top {
+  flex: none; display: flex; align-items: center; gap: 8px;
+  padding: calc(env(safe-area-inset-top) + 6px) 10px 6px;
+  position: relative; z-index: 4; background: transparent;
+}
+/* the top bar is see-through: the background runs behind it (and the notch); a soft shade keeps the name and the buttons readable */
+.tutor-top::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; z-index: -1; pointer-events: none;
+  height: calc(120px + env(safe-area-inset-top)); background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+}
+/* the name sits in the screen's centre: equal side columns (the left one empty, the tools on the right), the name in the
+   auto-sized middle column */
+.tutor-top { display: grid; grid-template-columns: 1fr minmax(0, auto) 1fr; }
+.tutor-top > .tutor-switcher { grid-column: 2; }
+.tutor-top > .tutor-tools { grid-column: 3; justify-self: end; }
+.tutor-top .as-icon { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12); }
+.tutor-title { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
+.tutor-title strong { font-size: 17px; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
+.tutor-title span { font-size: 12px; color: var(--muted); }
+.tutor-tools { display: flex; gap: 6px; position: relative; }
+.tutor-tools .as-icon { width: 40px; height: 40px; font-size: 18px; }
+.tutor-tools .as-tips-badge { top: -4px; right: -4px; }
+/* 自由縮放 at the top left of the screen (below the safe area, 12 px from the left edge), the 角色｜背景 target under it */
+.tutor-zoom-tools {
+  position: absolute; left: 12px; top: calc(env(safe-area-inset-top) + 12px); z-index: 6;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+}
+.tutor-zoom-tools .as-icon { width: 40px; height: 40px; font-size: 18px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12); }
+
+/* the stage fills the area above the chat: she stands in it, full figure, the speech bubble over her lower body (the bubble
+   sits at the bottom, so the face stays clear). The figure is body.webp, sized by its aspect (tutor.json figure); the
+   portrait layer (mouth) sits in it at the placement from tutor.json. */
+.tutor-stage {
+  flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  padding: 0 12px; position: relative;
+  /* the chat dock is out of the flow (ChatBar.css): the stage stops above the collapsed bar, as the figure did before */
+  margin-bottom: calc(env(safe-area-inset-bottom) + 10px + 54px);
+}
+/* the notes (the 需要 Claude line, the listening line) stack above the bar and take room the stage does not reserve: the stage
+   keeps the bubble clear of them (one note about two lines tall, it wraps on a phone; a second one adds more). No notes, no change. */
+.tutor-stage:has(~ .chat-dock .as-mic-note) { margin-bottom: calc(env(safe-area-inset-bottom) + 10px + 54px + 58px); }
+.tutor-stage:has(~ .chat-dock .as-mic-note + .as-mic-note) { margin-bottom: calc(env(safe-area-inset-bottom) + 10px + 54px + 98px); }
+/* the figure's height: the stage's, or the width's worth of it (--hw = figure h / w, set from tutor.json), whichever is less;
+   the width follows from the aspect ratio, so the body is never stretched */
+.tutor-portrait {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%); aspect-ratio: 1 / 1;
+  height: min(calc(100% - 8px), calc((100vw - 24px) * var(--hw, 1)));
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+/* 自由縮放 on: the figure takes the touches itself (pinch / drag / double tap), the page does not scroll under them; the
+   stage clips the figure at its edges (the chat dock and the top bar sit outside the stage) */
+.tutor-portrait.zoom-on { touch-action: none; cursor: grab; }
+/* a body that keeps its own background (a photo: tutor.json figure.backdrop, or detected): a plain backdrop. The photo fills
+   the stage's height from the top, so her head is never cut; the stage clips the sides evenly. No frame, no mask, no shadow.
+   The overlays stay in the picture's own frame (same box), so they line up with it. A cut-out keeps the figure framing. */
+.tutor-portrait.backdrop { top: 0; height: 100%; transform: translateX(-50%); }
+.tutor-stage:has(.tutor-portrait.backdrop) { overflow: hidden; }
+.tutor-stage.zoomed { overflow: hidden; }
+/* zoomed: the speech bubble (over the figure's lower body) lets the touches through, so the figure takes its pan / pinch */
+.tutor-stage.zoomed .tutor-bubble { pointer-events: none; }
+/* the body and the mouth move together: one wrapper, the box's size; it eases back to the default framing when the
+   view is not being dragged (switched off, double tap), and stays put while a gesture moves it */
+.tutor-zoom { position: absolute; inset: 0; transform-origin: 50% 50%; transition: transform 260ms ease; }
+.tutor-zoom.dragging { transition: none; }
+@media (prefers-reduced-motion: reduce) { .tutor-zoom { transition: none; } }
+.tutor-body, .tutor-mouth {
+  display: block; pointer-events: none; -webkit-user-drag: none;
+}
+.tutor-body { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; transition: opacity 200ms ease; }
+.tutor-face-layer { position: absolute; pointer-events: none; }
+.tutor-mouth { position: absolute; object-fit: fill; width: auto; height: auto; }
+
+/* the player's own picture (人設圖片, TutorPortrait custom): a whole picture in the same square box as the hamster, contained (no
+   cropping, frames of any size); no card, it stands on the stage. A single picture bobs while she speaks (up 3%, back, 260 ms). */
+.tutor-custom { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; -webkit-user-drag: none; }
+.tutor-custom.talking { animation: tutor-custom-bob 260ms ease-in-out infinite; }
+@keyframes tutor-custom-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3%); } }
+@media (prefers-reduced-motion: reduce) { .tutor-custom.talking { animation: none; } }
+
+/* the bubble itself does not clip (overflow visible), so the name badge above its top edge shows; only the text scrolls */
+.tutor-bubble {
+  flex: none; position: relative; z-index: 2; margin: 4px 4px 0; padding: 14px 14px 10px; border-radius: 16px;
+  background: var(--panel); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14); font-size: 15px; line-height: 1.55;
+  width: 100%; max-width: 520px; box-sizing: border-box; cursor: pointer;
+}
+.tutor-bubble-text {
+  display: block; white-space: pre-wrap; max-height: calc(24vh - 24px); overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.tutor-bubble b {
+  position: absolute; top: -11px; left: 12px; padding: 2px 12px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: 13px;
+  line-height: 1.4; white-space: nowrap;
+}
+
+/* the chat is the shared dock (ChatBar.css): the figure stays put, the bubble is hidden while the chat is open */
+/* the label keeps its width (it used to collapse to one character per line); the field takes the rest */
+.tutor-name { flex: 0 1 11em; width: 11em; min-width: 6em; min-height: 44px; box-sizing: border-box; font-size: 16px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; }
+
+/* the sheets are the shared assistant ones; the settings body needs room on a short phone */
+.tutor .sheet-backdrop { position: fixed; }
+.tutor .as-settings .as-settings-body { max-height: 70vh; overflow-y: auto; }
+
+/* the three sheets of the top bar (⚙️ 設定, 速查, 小提醒筆記本) are dark here: the backdrop has .sheet-dark (TutorView passes
+   theme="dark" to the shared shells). Surfaces: sheet #161616, rows / inputs #1c1c1c, lines #2a2a2a; text #e8e8e8 (muted #9a9a9a,
+   about 6:1 on the panel); the danger / ok / ng / warn texts are lifted so they pass 4.5:1 on the dark surfaces. */
+.sheet-dark { background: rgba(0, 0, 0, 0.5); color-scheme: dark; }
+.sheet-dark .sheet { background: #161616; color: var(--ink); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.5); border-top: 1px solid var(--line); }
+.sheet-dark .sheet-head strong { color: var(--ink); }
+.sheet-dark .sheet-close { color: var(--ink); }
+.sheet-dark rt { color: #c4c4c4; }
+.sheet-dark .as-tip-label { color: #c8c8c8; }
+/* 人設圖片: the error line (a picture the browser would not take, a failed save) and the frame thumbnails */
+.sheet-dark .as-custom-err small { color: #e07f78; }
+.sheet-dark .as-custom-thumb { background: #262626; border-color: var(--line); }
+.as-custom-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.as-custom-frame { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.as-custom-thumb { flex: none; width: 56px; height: 56px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); }
+.as-custom-shape { flex: 0 0 auto; min-height: 44px; min-width: 64px; font-size: 16px; padding: 0 8px; border-radius: 8px; }
+.as-custom-frame > .as-small { margin-left: auto; }
+.as-custom-foot { display: flex; justify-content: flex-end; align-items: center; min-height: 44px; }
+/* inputs and selects: the panel, not the white field of the light sheet */
+.sheet-dark input:not([type='checkbox']):not([type='range']):not([type='radio']), .sheet-dark select, .sheet-dark textarea.as-persona {
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line); color-scheme: dark;
+}
+.sheet-dark input::placeholder, .sheet-dark textarea::placeholder { color: var(--muted); opacity: 1; }
+.sheet-dark input[type='range'], .sheet-dark input[type='checkbox'], .sheet-dark input[type='radio'] { accent-color: var(--accent); }
+/* rows, buttons and the segmented choices */
+.sheet-dark .as-row .as-try, .sheet-dark .as-small { background: var(--panel); color: var(--ink); border-color: var(--line); }
+.sheet-dark .as-small.danger { color: #e07f78; }
+.sheet-dark .as-small.danger.on { background: #7a3b38; border-color: #7a3b38; color: #f5f5f5; }
+.sheet-dark .as-small.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.sheet-dark .as-seg { border-color: var(--line); }
+.sheet-dark .as-seg button { background: var(--panel); color: var(--ink); }
+.sheet-dark .as-seg button.on { background: var(--accent); color: var(--on-accent); }
+.sheet-dark .as-seg button:disabled { color: var(--muted); }
+/* the 練習中 / 已學會 tabs of 小提醒 (index.css .tabs): a dark track, the selected tab on the panel */
+.sheet-dark .tabs { background: #262626; }
+.sheet-dark .tabs button { color: var(--muted); }
+.sheet-dark .tabs button.on { background: var(--panel); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+/* the usage bars */
+.sheet-dark .usage-bar { background: #2a2a2a; }
+.sheet-dark .usage-bar i { background: var(--accent); }
+.sheet-dark .usage-warn { color: #e07f78; }
+.sheet-dark .usage-note, .sheet-dark .usage-sub { color: var(--muted); }
+/* 小提醒: the tips cards and their targets (the light cards and their cream tones become dark) */
+.sheet-dark .tip-card { background: var(--panel); color: var(--ink); border-color: var(--line); }
+.sheet-dark .tip-card.done { opacity: 1; }
+.sheet-dark .tip-target { background: #262626; color: var(--ink); border-color: var(--line); }
+.sheet-dark .tip-target.on { background: var(--accent-tint); border-color: var(--accent); color: var(--accent-text); }
+.sheet-dark .tip-said, .sheet-dark .tip-foot, .sheet-dark .tip-live, .sheet-dark .tip-empty { color: var(--muted); }
+.sheet-dark .tip-verdict.ok { color: #7fc497; }
+.sheet-dark .tip-verdict.ng { color: #e07f78; }
+/* 速查: the history rows, the need note, the badges and the ✕ */
+.sheet-dark .lk-need { background: #2a2a2a; color: #e8e8e8; }
+.sheet-dark .lk-entry { background: var(--panel); color: var(--ink); border-color: var(--line); }
+.sheet-dark .lk-badge { background: #2a2a2a; color: #e8e8e8; }
+.sheet-dark .lk-badge[data-level="級外"] { background: #222222; color: #b5b5b5; }
+.sheet-dark .lk-note, .sheet-dark .lk-h, .sheet-dark .lk-foot { color: var(--muted); }
+.sheet-dark .lk-del { color: var(--muted); background: transparent; }
+.sheet-dark .lk-speak { color: var(--ink); }
+.sheet-dark .lk-form input { background: var(--panel); color: var(--ink); border-color: var(--line); }
+.tutor .as-tips-badge { background: var(--accent); }
+
+/* the name and subtitle block in the top bar (the middle column) */
+.tutor-switcher { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; }
+.tutor-switcher .tutor-title strong, .tutor-switcher .tutor-title span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* a 320 px phone: the top icons keep a 40px tap target; the gaps shrink instead, and the name truncates with an ellipsis */
+@media (max-width: 360px) {
+  .tutor-top { gap: 4px; }
+  .tutor-tools { gap: 2px; }
+  .tutor-zoom-row { gap: 4px; }
+  .tutor-tools .as-icon { width: 40px; height: 40px; font-size: 16px; }
+  .tutor-title strong { font-size: 15px; }
+  .tutor-title span { font-size: 11px; }
+}
+
+/* 背景 (the background layer, ui/TutorBackdrop): the picture covers the stage (or, with the classroom, the scene box that keeps the
+   picture's aspect ratio and holds her on the lectern). The scene is laid out in px (left, top, width, height), so a figure inside it
+   scales with it; the view eases back when a gesture ends (not while one moves it). */
+.tutor-backdrop { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+.tutor-backdrop.zoom-on { touch-action: none; }
+/* no transition on the scene box: it is recomputed on load, rotation and when the phone's toolbar shows or hides, and an animated box slid down on every first paint */
+.tutor-scene { position: absolute; }
+.tutor-scene.dragging { transition: none; }
+.tutor-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; user-select: none; }
+.tutor-dim { position: absolute; inset: 0; background: #000; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .tutor-scene { transition: none; } }
+/* 角色｜背景: the zoom's target, under the 自由縮放 button at the top left (44 px targets; the dark segmented style of the other buttons) */
+.tutor-target { background: var(--panel); }
+.tutor-target button { min-width: 44px; min-height: 44px; padding: 0 12px; font-size: 14px; }
+/* her picture (custom) on the lectern: no fixed square, the box is as tall as the picture; its feet sit at the anchor */
+.tutor-zoom.in-flow { position: relative; inset: auto; }
+.tutor-custom.in-flow { position: relative; inset: auto; width: 100%; height: auto; }
+
+/* 人物 (the character) button and the free zoom in one row at the top left; 人物 sits left of the magnifier */
+.tutor-zoom-row { display: flex; gap: 8px; align-items: center; }
+/* the round 人物 and 自由縮放 buttons: 44 px targets */
+.tutor-zoom-row .as-icon { width: 44px; height: 44px; }
+/* the classroom's figure layer: the scene's default box (not the zoomed one), so a background zoom leaves her where she is. It
+   takes no touches itself; her picture (the portrait) takes its own, for the 角色 zoom */
+.tutor-figure-layer { position: absolute; pointer-events: none; }
+.tutor-figure-layer .tutor-portrait { pointer-events: auto; }
+/* an added character with no picture yet: a grey standing silhouette in her place */
+.tutor-portrait.placeholder { color: #8a8a8a; opacity: 0.55; }
+.tutor-silhouette { display: block; width: 100%; height: 100%; pointer-events: none; }
+/* the character tabs of 人物 (1 2 3 ＋ and the added ones): 44 px targets, the selected one lit */
+.char-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.char-tabs button { min-width: 44px; min-height: 44px; padding: 0 12px; font-size: 15px; border-radius: 10px; }
+.char-tabs button[aria-selected='true'] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.sheet-dark .char-tabs button { background: var(--panel); color: var(--ink); border: 1px solid var(--line); }
+.sheet-dark .char-tabs button[aria-selected='true'] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.sheet-dark .char-tabs button:disabled { color: var(--muted); }
+/* the divider above the shared background section of 人物 */
+.tutor-divider { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); }
+.as-char-del { display: flex; justify-content: flex-end; }
+.as-voice-note small { color: var(--muted); }
+
+/* 背景 tabs (人物 › 背景): a thumbnail over its name, 44 px targets; the one in use is lit */
+.bg-tabs { align-items: flex-start; }
+.bg-tab { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 64px; padding: 4px; }
+.bg-tab-label { font-size: 12px; line-height: 1.2; }
+.bg-thumb { display: block; width: 56px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); background: #262626; }
+.bg-thumb-black { background: #000; }
+.bg-tab.on .bg-thumb { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
