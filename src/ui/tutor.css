@@ -243,3 +243,8 @@
 .bg-thumb { display: block; width: 56px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); background: #262626; }
 .bg-thumb-black { background: #000; }
 .bg-tab.on .bg-thumb { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+
+/* the stage only holds the speech bubble now; the figure and the background live in the backdrop under it. Let clicks, drags,
+   pinches and the wheel pass through the empty stage to them; its own children (the bubble, an unanchored figure) take them back */
+.tutor-stage { pointer-events: none; }
+.tutor-stage > * { pointer-events: auto; }
