@@ -133,7 +133,7 @@ export function LookupSheet(props: { onClose: () => void; ready: boolean; theme?
 
         {/* 查 only once the keyboard is down: with it up, the return key just closes it (the answer then shows on a full sheet) */}
         <form ref={formRef} className="lk-form" onSubmit={(ev) => { ev.preventDefault(); if (keyboard.open) inputRef.current?.blur(); else void submit(); }}>
-          <input ref={inputRef} value={live && mic.listening ? live : q} placeholder="打中文查日文說法，打日文查意思：沒什麼想法、〜てしまう" aria-label="要查的內容"
+          <input ref={inputRef} value={live && mic.listening ? live : q} placeholder="打中文查日文，打日文查意思" aria-label="要查的內容"
             maxLength={LOOKUP_MAX_CHARS} disabled={!ready} onChange={(ev) => setQ(ev.target.value)} />
           <div className="lk-form-row">
             <div className="as-seg lk-lang" role="radiogroup" aria-label="語音辨識語言">

@@ -9,6 +9,7 @@ import { speakReply, stopSpeaking } from '../game/tts';
 import { stripRuby } from '../game/furigana';
 import { rubyNodes } from './Furigana';
 import { speechNoteText, useSpeechInput } from './useSpeechInput';
+import { useSheetKeyboard } from './useSheetKeyboard';
 import { IconClose } from './icons';
 
 type Tab = 'practice' | 'learned';
@@ -30,6 +31,11 @@ export function TipsSheet(props: { onClose: () => void; theme?: 'dark' }) {
   const practiceRef = useRef(practice);
   practiceRef.current = practice;
   const timers = useRef<number[]>([]);
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  // the 打字練習 fields: the sheet grows up to the top bar, its body ends above the keyboard, the page never slides
+  const keyboard = useSheetKeyboard(backdropRef, sheetRef, { body: bodyRef, full: true });
 
   useEffect(() => onTips(() => setTips(loadTips())), []);
   useEffect(() => () => { timers.current.forEach((t) => clearTimeout(t)); }, []);
@@ -141,8 +147,9 @@ export function TipsSheet(props: { onClose: () => void; theme?: 'dark' }) {
   };
 
   return (
-    <div className={props.theme === 'dark' ? 'sheet-backdrop sheet-dark' : 'sheet-backdrop'} onClick={props.onClose}>
-      <section className="sheet as-tips" onClick={(ev) => ev.stopPropagation()} role="dialog" aria-label="小提醒">
+    <div ref={backdropRef} className={props.theme === 'dark' ? 'sheet-backdrop sheet-dark' : 'sheet-backdrop'} onClick={props.onClose}>
+      <section ref={sheetRef} className="sheet as-tips" onClick={(ev) => ev.stopPropagation()} role="dialog" aria-label="小提醒"
+        onFocus={keyboard.onFocus} onBlur={keyboard.onBlur}>
         <div className="sheet-head">
           <strong>小提醒</strong>
           <button className="sheet-close" onClick={props.onClose} aria-label="關閉"><IconClose /></button>
@@ -156,7 +163,7 @@ export function TipsSheet(props: { onClose: () => void; theme?: 'dark' }) {
           </button>
         </div>
         {note && <div className="as-mic-note" role="status">{note}</div>}
-        <div className="as-settings-body">
+        <div ref={bodyRef} className="as-settings-body">
           {list.length === 0 && (
             <p className="tip-empty">{tab === 'practice' ? '還沒有要練習的小提醒。之後她在日語老師模式裡給的提醒會收在這裡。' : '還沒有學會的句子。'}</p>
           )}

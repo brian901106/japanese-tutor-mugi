@@ -8,7 +8,8 @@
 //      · raise (速查, `anchor` given): the sheet keeps its size and is only moved up until its field row clears the keyboard;
 //        what is below it (the history) stays under the keyboard.
 //      · pad (settings, `body` given): the sheet keeps its size and place, its bottom padding grows by the keyboard's height,
-//        so its scrolling body ends above the keyboard; the focused field is scrolled into view inside the body.
+//        so its scrolling body ends above the keyboard (a short sheet grows so some of it shows); the focused field is
+//        scrolled into view inside the body.
 //   pan — if iOS pans the visual viewport anyway (seen on an iPhone: the top buttons went under the status bar), the app
 //      (#root) is moved down by visualViewport.offsetTop, as the chat bar does, so nothing moves on screen; while the keyboard
 //      is up a finger drag outside the body does not scroll the page either.
@@ -42,6 +43,25 @@ export function scrollToShow(p: { fieldTop: number; fieldBottom: number; bodyTop
   return 0;
 }
 
+/** pad: how much of a short sheet stays above the keyboard (it grows up to this); the room kept for the top bar when it
+ *  cannot be measured, and the gap under it */
+const PAD_SHOW_PX = 260;
+const TOP_BAR_PX = 110;
+const TOP_GAP_PX = 8;
+
+/** pad: the sheet's height with the keyboard up (unit-tested): its own height, or taller so about PAD_SHOW_PX of it shows
+ *  above the keyboard (`full`: as tall as it can be), but never up under the top bar (`topBar`: its bottom). */
+export function padHeight(p: { natural: number; kbH: number; fullH: number; topBar?: number; full?: boolean }): number {
+  const most = p.fullH - (p.topBar ?? TOP_BAR_PX);
+  return Math.round(p.full ? Math.max(p.natural, most) : Math.max(p.natural, Math.min(p.kbH + PAD_SHOW_PX, most)));
+}
+
+/** the bottom of the screen's top bar (the 人物 / 設定 buttons) plus a gap, unpanned; undefined when there is none */
+function topBarBottom(pan: number): number | undefined {
+  const bar = document.querySelector('.tutor-top');
+  return bar ? Math.round(bar.getBoundingClientRect().bottom - pan + TOP_GAP_PX) : undefined;
+}
+
 /** a field that brings up the text keyboard */
 function isTextField(t: EventTarget | null): t is HTMLInputElement | HTMLTextAreaElement {
   if (t instanceof HTMLTextAreaElement) return true;
@@ -49,11 +69,11 @@ function isTextField(t: EventTarget | null): t is HTMLInputElement | HTMLTextAre
 }
 
 export function useSheetKeyboard(backdropRef: RefObject<HTMLElement | null>, sheetRef: RefObject<HTMLElement | null>,
-  opts: { anchor?: RefObject<HTMLElement | null>; body?: RefObject<HTMLElement | null> }) {
-  const { anchor, body } = opts;
+  opts: { anchor?: RefObject<HTMLElement | null>; body?: RefObject<HTMLElement | null>; full?: boolean }) {
+  const { anchor, body, full } = opts;
   const st = useRef({
     lift: false, liftTimer: 0, raf: 0, settleUntil: 0, key: '', shift: 0, pan: 0,
-    field: null as HTMLInputElement | HTMLTextAreaElement | null, shown: null as Element | null,
+    field: null as HTMLInputElement | HTMLTextAreaElement | null, shown: null as Element | null, natural: 0,
   });
   const [open, setOpen] = useState(false); // the keyboard is up over this sheet
 
@@ -81,15 +101,19 @@ export function useSheetKeyboard(backdropRef: RefObject<HTMLElement | null>, she
       if (!!box !== was) {
         el.classList.toggle('kb-open', !!box);
         setOpen(!!box);
-        // pad: the sheet keeps the height it had; the padding (below) then shortens its body
-        if (body && box) { sheet.style.boxSizing = 'border-box'; sheet.style.height = `${sheet.offsetHeight}px`; }
-        if (!box) { sheet.style.height = ''; sheet.style.boxSizing = ''; sheet.style.paddingBottom = ''; s.shown = null; }
+        // pad: the sheet keeps the height it had (a short one grows, padHeight); the padding (below) then shortens its body
+        if (body && box) { s.natural = sheet.offsetHeight; sheet.style.boxSizing = 'border-box'; sheet.style.maxHeight = 'none'; }
+        if (!box) { sheet.style.height = ''; sheet.style.maxHeight = ''; sheet.style.boxSizing = ''; sheet.style.paddingBottom = ''; s.shown = null; }
       }
       s.key = key;
       s.shift = box?.shift ?? 0;
       el.style.setProperty('--kb-top', box ? `${box.kbTop}px` : '');
       if (anchor) sheet.style.transform = box?.shift ? `translate3d(0, ${-box.shift}px, 0)` : '';
-      if (body && box) sheet.style.paddingBottom = `${Math.max(0, window.innerHeight - box.kbTop) + 10}px`;
+      if (body && box) {
+        const kbH = Math.max(0, window.innerHeight - box.kbTop);
+        sheet.style.height = `${padHeight({ natural: s.natural, kbH, fullH: window.innerHeight, topBar: topBarBottom(s.pan), full })}px`;
+        sheet.style.paddingBottom = `${kbH + 10}px`;
+      }
       const root = document.getElementById('root');
       if (root && pan !== s.pan) root.style.transform = pan ? `translate3d(0, ${pan}px, 0)` : '';
       s.pan = pan;
@@ -106,7 +130,7 @@ export function useSheetKeyboard(backdropRef: RefObject<HTMLElement | null>, she
       document.documentElement.classList.remove('kb-lock');
       if (window.scrollY || window.scrollX) window.scrollTo(0, 0);
     }
-  }, [backdropRef, sheetRef, anchor, body, unlift]);
+  }, [backdropRef, sheetRef, anchor, body, full, unlift]);
 
   const schedule = useCallback(() => {
     const s = st.current;

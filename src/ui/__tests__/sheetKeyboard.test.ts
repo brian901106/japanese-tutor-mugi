@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { scrollToShow, sheetLift } from '../useSheetKeyboard';
+import { padHeight, scrollToShow, sheetLift } from '../useSheetKeyboard';
 
 describe('sheetLift (速查 sheet on the iOS keyboard)', () => {
   it('raises the sheet only until the field row clears the keyboard', () => {
@@ -30,5 +30,21 @@ describe('scrollToShow (a settings field scrolled into view above the keyboard)'
   });
   it('shows the top of a field taller than the body (the persona box)', () => {
     expect(scrollToShow({ fieldTop: 300, fieldBottom: 900, ...body })).toBe(192);
+  });
+});
+
+describe('padHeight (a settings / 小提醒 sheet with the keyboard up)', () => {
+  it('keeps a tall sheet as it is', () => {
+    expect(padHeight({ natural: 702, kbH: 380, fullH: 900 })).toBe(702);
+  });
+  it('grows a short sheet so part of it shows above the keyboard', () => {
+    expect(padHeight({ natural: 300, kbH: 380, fullH: 900 })).toBe(640);
+  });
+  it('never grows under the top bar', () => {
+    expect(padHeight({ natural: 300, kbH: 500, fullH: 700 })).toBe(590);
+    expect(padHeight({ natural: 300, kbH: 500, fullH: 700, topBar: 130 })).toBe(570);
+  });
+  it('full: grows right up to the top bar (小提醒)', () => {
+    expect(padHeight({ natural: 300, kbH: 380, fullH: 900, topBar: 70, full: true })).toBe(830);
   });
 });
