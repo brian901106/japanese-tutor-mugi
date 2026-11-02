@@ -1,5 +1,6 @@
 // Shared vocabulary between the Claude chat endpoint (server/claudeChat.ts, prompts in server/prompts.ts) and the client
-// (game/claudeBrain.ts). Pure constants only: no imports, so the Node side can use it too.
+// (game/claudeBrain.ts). Pure constants only (the one type import is erased), so the Node side can use it too.
+import type { LookupLevel } from './lookup.ts';
 
 export const CLAUDE_MODEL_DEFAULT = 'claude-haiku-5-5';
 
@@ -150,4 +151,4 @@ export type ChatSegment = { lang: 'ja' | 'zh'; text: string; gloss: string };
  * Her whole reply as Claude writes it (Structured Outputs, the schema in server/claudeChat.ts CHAT_REPLY_SCHEMA). The server
  * sends it back as the `done` text (canonical form, see game/replyJson.ts); tone is left out only in a cut reply.
  */
-export type ChatReplyJson = { segments: ChatSegment[]; tip: string; tone?: (typeof CHAT_TONES)[number] };
+export type ChatReplyJson = { segments: ChatSegment[]; tip: string; tipLevel?: LookupLevel; tone?: (typeof CHAT_TONES)[number] };

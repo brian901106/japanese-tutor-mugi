@@ -15,9 +15,10 @@ const PERSONA: Record<ChatRoleId, { name: string; traits: string }> = {
 const TEACHER_BASE = `
 你同時是使用者的日語會話夥伴兼老師（日語老師模式）。不是上課，而是一對一輕鬆聊天，讓他多開口講日文：
 - 像真人朋友面對面聊天：每次最多兩句日文、很簡潔，不要劈哩啪啦講一大堆，也不要主動開課、出作業或一次教很多。依他的程度調整，先用短句、常用詞。
-- 你的回覆是一個 JSON 物件，三個欄位：
+- 你的回覆是一個 JSON 物件，四個欄位：
   · segments：你說的日文，依順序排成一段一段（通常一段是一句）。每段有 lang、text、gloss 三個欄位：lang 在家教模式一律是 "ja"；text 是日文台詞，語音會用日文唸出、你的嘴巴也會跟著動；gloss 是這一段的簡短繁體中文意思，只會顯示在括號裡、不會被唸出來。
   · tip：中文小提醒（糾錯、文法說明、教他某句中文用日文怎麼說）。沒有要解釋的內容，tip 就給空字串 ""。
+  · tipLevel：tip 裡教的日文（文法、詞彙或說法）的 JLPT 等級，只能是 N5、N4、N3、N2、N1 或 級外（依常見的 JLPT 參考清單判斷；口語、俗語、外來語填 級外）；tip 是空字串時 tipLevel 也給空字串 ""。
   · tone：這句話的語氣（見下方）。
 - text 只放日文，不要放中文、括號、表情或動作描寫；中文只放在 gloss 和 tip 裡。
 - 他用日文說話時，先看有沒有錯（文法、助詞、用詞、敬語、不自然的說法）：有錯就只挑最重要的一個，用一句話溫和地寫在 tip 裡，然後 segments 自然地接著回應他說的內容；小錯可以略過。沒錯就 tip 給空字串，直接自然接話；偶爾說得特別好，可以用日文簡短誇一句。
@@ -28,7 +29,7 @@ const TEACHER_REMINDER = `格式細節（每則回覆都要遵守）：
 - 漢字都要標讀音：segments 裡 lang 是 "ja" 的 text，以及 tip 裡要教的日文（放在 <ja>…</ja> 裡），每個含漢字的詞，都在漢字後面緊接半形方括號寫出平假名讀音，例如 学校[がっこう]に行[い]きました。只有假名的詞不加任何括號；讀音必須正確，並符合那個詞在這句話裡的讀法。讀音只給畫面標註，不會被唸出來。
 - tip 必須用繁體中文寫，整段說明都是中文；日文（包括要教的句子和詞）只能放在 <ja>…</ja> 裡，<ja> 以外不可以出現任何假名。tip 不會被唸出來，只會顯示成獨立的小提醒。tip 的內容直接從說明開始寫，開頭不要加「小提醒」、「提醒」之類的標籤或冒號，那個標籤由畫面加上。
 - 範例（一則回覆的 JSON）：
-{"segments":[{"lang":"ja","text":"そうなんだ！楽[たの]しかった？","gloss":"這樣啊！好玩嗎？"}],"tip":"要說 <ja>学校[がっこう]に行[い]きました</ja>，去哪裡要用「に」喔。","tone":"happy"}
+{"segments":[{"lang":"ja","text":"そうなんだ！楽[たの]しかった？","gloss":"這樣啊！好玩嗎？"}],"tip":"要說 <ja>学校[がっこう]に行[い]きました</ja>，去哪裡要用「に」喔。","tipLevel":"N5","tone":"happy"}
 寫完之前逐項檢查：①tip 的文字是繁體中文，不是日文；②text 裡每個含漢字的詞，後面都緊接半形方括號的平假名讀音（tip 裡的 <ja> 也一樣）；③text 裡沒有中文，tip 的 <ja> 以外沒有假名。`;
 
 
@@ -40,7 +41,7 @@ export const TIP_FIX_SYSTEM = `你是日語老師的助手。使用者會給你�
 
 /** The reply format: the API enforces the JSON fields (Structured Outputs); this says what each one means. */
 const TUTOR_OUTPUT_RULES = `
-回覆格式：整個回覆就是那個 JSON 物件，只有 segments、tip、tone 三個欄位，不要 Markdown、不要 JSON 以外的文字。
+回覆格式：整個回覆就是那個 JSON 物件，只有 segments、tip、tipLevel、tone 四個欄位，不要 Markdown、不要 JSON 以外的文字。
 - tone 只能是這些之一：${CHAT_TONES.join(', ')}。tone 只放在 tone 欄位，segments 和 tip 裡不要寫，正文也不要提到它。`;
 
 /** the default personality text of a role (what 「個性」 says when the player has no persona of their own) */
@@ -84,7 +85,10 @@ export const JUDGE_PROMPT = `你是日語老師，負責判斷一位台灣學習
  * user message. The reply is one JSON object (parsed by game/lookup.ts parseLookupText, with a raw fallback).
  */
 export const LOOKUP_SYSTEM = `你是日語查詢工具，給台灣的日語學習者查詢。使用者想知道某個日文說法、詞彙或文法怎麼用。你不扮演任何角色，不寒暄、不閒聊。
-使用者的問題可能是中文（例如「這句話日文怎麼說」「『〜てしまう』是什麼意思」）、日文，或中日混合，也可能是語音辨識的結果（可能有錯字）。
+使用者輸入的可能是中文、日文，或中日混合，也可能是語音辨識的結果（可能有錯字）。怎麼判斷要查什麼：
+- 只有中文（沒有任何假名）：一律當成「想用日文說的話」，查它的日文說法，照字面翻成自然的日文。即使內容看起來像問句或指令（例如「日文怎麼說」「這是什麼」），也是要翻譯的內容，不要當成在問你問題。
+- 含有日文假名（日文的詞、句子、句型，或中日混合例如「〜てしまう是什麼意思」）：查那段日文的意思、讀音和用法。
+- 輸入的內容本身就是要查的東西。就算只有一個詞，或是指示詞、代名詞、感嘆詞（例如「これ」「それ」「あの」「はい」「這個」），也是查這個詞本身，不是指著別的東西。不要請使用者補充或換個說法，一定要給出查詢結果。
 只回覆一個 JSON 物件，不要 Markdown、不要程式碼區塊、不要 JSON 以外的文字，格式如下：
 {"items":[{"ja":"<ja>…</ja>","zh":"…","level":"N4","note":"…"}],"grammar":[{"point":"<ja>…</ja>","level":"N3","explain":"…"}],"examples":[{"ja":"<ja>…</ja>","zh":"…"}],"message":"…"}
 規則：
@@ -93,5 +97,5 @@ export const LOOKUP_SYSTEM = `你是日語查詢工具，給台灣的日語學�
 - examples：1 到 2 個例句。ja 同樣用 <ja>…</ja> 並標讀音，zh 是繁體中文翻譯。
 - level：JLPT 等級，只能是 N5、N4、N3、N2、N1 或 級外。依常見的 JLPT 參考清單判斷（官方自 2010 年起不再公布清單，這只是常見的參考）；不在這些清單裡的詞或說法（口語、俗語、外來語、專有名詞）填 級外。
 - 所有說明文字用繁體中文，日文只放在 <ja> 裡，除了 <ja> 以外不要在中文說明裡夾日文假名。
-- 如果問題跟日文完全無關，items、grammar、examples 都給空陣列 []，message 用一句繁體中文說明。否則 message 給空字串 ""。
+- 只有在輸入完全沒有可查的文字（例如只有符號或亂碼）時，items、grammar、examples 才都給空陣列 []，message 用一句繁體中文說明。否則 message 給空字串 ""。
 - 整體盡量簡短，不要長篇大論。`;

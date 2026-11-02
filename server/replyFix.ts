@@ -101,5 +101,5 @@ export async function fixReplyJson(raw: string, opts: FixOptions = {}): Promise<
   const wrapped = wrapJapanese(written);
   if (wrapped !== written) log(`[tip] Japanese in the tip wrapped in <ja>: ${written.slice(0, 60)}`);
   const tip = wrapped ? await fillReadings(wrapped, log) : '';
-  return { json: canonicalReplyJson({ segments, tip, tone: fields.tone }), tipRewrite };
+  return { json: canonicalReplyJson({ segments, tip, tipLevel: tip ? fields.tipLevel : undefined, tone: fields.tone }), tipRewrite };
 }

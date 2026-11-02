@@ -60,6 +60,12 @@ html.standalone #root { bottom: auto; height: 100vh; height: 100lvh; height: var
 .sheet-head strong { font-size: 17px; }
 .sheet-close { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -4px 0; border-radius: 50%; font-size: 16px; color: var(--muted); }
 .sheet > .sheet-head { flex: none; }
+/* a sheet's field focused with the keyboard up (ui/useSheetKeyboard): 速查 is raised until its field row clears the keyboard,
+   the settings sheets keep their place with a padded bottom; from the keyboard's top (--kb-top) down the backdrop is solid,
+   so what shows behind the translucent keyboard is the sheet's black. The field waits above the screen until then. */
+.sheet-backdrop.kb-open { background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) var(--kb-top), #161616 var(--kb-top)); }
+.sheet-backdrop.kb-open .sheet { animation: none; }
+.sheet .kb-lift { transform: translate3d(0, -300vh, 0); }
 
 /* the 練習中 / 已學會 switch of 小提醒 (TipsSheet) */
 .tabs { display: flex; background: #262626; border-radius: 999px; padding: 3px; }

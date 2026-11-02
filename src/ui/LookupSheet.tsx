@@ -1,7 +1,7 @@
 // 速查: the player asks how to say something in Japanese, or about a word or grammar point, by typing or by voice. Each answer
 // shows the Japanese (ruby readings, 🔊 to hear it), the meaning and usage in Chinese, a JLPT badge and examples. Lookups are
 // kept in a local history (game/lookup). Not the character chat: nothing here reaches her chat or her voice.
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   addLookup, askLookup, clearLookups, jaDisplay, jaSpeakable, levelBadge, LOOKUP_MAX_CHARS, loadLookups, newLookupId, removeLookup, saveLookups,
   stripJaTags, type LookupAnswer, type LookupEntry,
@@ -11,6 +11,7 @@ import { speakReply, stopSpeaking } from '../game/tts';
 import { rubyNodes } from './Furigana';
 import { speechNoteText, useSpeechInput } from './useSpeechInput';
 import { IconClose, IconMic, IconSpeaker } from './icons';
+import { useSheetKeyboard } from './useSheetKeyboard';
 
 type Lang = 'zh-TW' | 'ja-JP';
 
@@ -23,6 +24,11 @@ export function LookupSheet(props: { onClose: () => void; ready: boolean; theme?
   const [note, setNote] = useState('');
   const [live, setLive] = useState(''); // what the mic hears so far
   const [lang, setLang] = useState<Lang>('zh-TW'); // the recognition language: 中 (default) or 日
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const keyboard = useSheetKeyboard(backdropRef, sheetRef, { anchor: formRef }); // the sheet sits on the keyboard, the page never slides
 
   const mic = useSpeechInput({
     onStart: () => setNote(''),
@@ -39,7 +45,7 @@ export function LookupSheet(props: { onClose: () => void; ready: boolean; theme?
   };
 
   const submit = async () => {
-    const text = q.trim();
+    const text = q.trim(); // typed as is: 中文 asks how to say it, 日文 asks what it means (server/prompts.ts LOOKUP_SYSTEM)
     if (!text || busy || !ready) return;
     setBusy(true);
     setErr('');
@@ -113,8 +119,9 @@ export function LookupSheet(props: { onClose: () => void; ready: boolean; theme?
   );
 
   return (
-    <div className={props.theme === 'dark' ? 'sheet-backdrop sheet-dark' : 'sheet-backdrop'} onClick={close}>
-      <section className="sheet as-tips as-lookup" onClick={(ev) => ev.stopPropagation()} role="dialog" aria-label="速查">
+    <div ref={backdropRef} className={props.theme === 'dark' ? 'sheet-backdrop sheet-dark' : 'sheet-backdrop'} onClick={close}>
+      <section ref={sheetRef} className="sheet as-tips as-lookup" onClick={(ev) => ev.stopPropagation()} role="dialog" aria-label="速查"
+        onFocus={keyboard.onFocus} onBlur={keyboard.onBlur}>
         <div className="sheet-head">
           <strong>速查</strong>
           <button className="sheet-close" onClick={close} aria-label="關閉"><IconClose /></button>
@@ -124,8 +131,9 @@ export function LookupSheet(props: { onClose: () => void; ready: boolean; theme?
           <p className="lk-need" role="status">速查需要 Claude AI 金鑰（.env.local 的 ANTHROPIC_API_KEY）。設定好之後重新開啟就能查。</p>
         )}
 
-        <form className="lk-form" onSubmit={(ev) => { ev.preventDefault(); void submit(); }}>
-          <input value={live && mic.listening ? live : q} placeholder="想查什麼？例如：這句話日文怎麼說、〜てしまう" aria-label="要查的內容"
+        {/* 查 only once the keyboard is down: with it up, the return key just closes it (the answer then shows on a full sheet) */}
+        <form ref={formRef} className="lk-form" onSubmit={(ev) => { ev.preventDefault(); if (keyboard.open) inputRef.current?.blur(); else void submit(); }}>
+          <input ref={inputRef} value={live && mic.listening ? live : q} placeholder="打中文查日文說法，打日文查意思：沒什麼想法、〜てしまう" aria-label="要查的內容"
             maxLength={LOOKUP_MAX_CHARS} disabled={!ready} onChange={(ev) => setQ(ev.target.value)} />
           <div className="lk-form-row">
             <div className="as-seg lk-lang" role="radiogroup" aria-label="語音辨識語言">
@@ -138,7 +146,7 @@ export function LookupSheet(props: { onClose: () => void; ready: boolean; theme?
               onClick={() => (mic.listening ? mic.stop() : mic.start())}>
               {mic.listening ? '聆聽中…' : <IconMic />}
             </button>
-            <button type="submit" className="as-small" disabled={!ready || busy || !q.trim()}>查</button>
+            <button type="submit" className="as-small" disabled={!ready || busy || !q.trim() || keyboard.open}>查</button>
           </div>
         </form>
         {note && <div className="as-mic-note" role="status">{note}</div>}

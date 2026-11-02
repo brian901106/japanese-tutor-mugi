@@ -54,6 +54,14 @@ describe('readReplyValue: the fields, each checked', () => {
   it('a valid tone is kept', () => {
     expect(readReplyValue({ segments: [], tip: '', tone: 'sad' }).tone).toBe('sad');
   });
+  it('a JLPT level of the tip is kept; \'\', an unknown level or a wrong type is dropped (no level, not 級外)', () => {
+    expect(readReplyValue({ segments: [], tip: 'x', tipLevel: 'N3' }).tipLevel).toBe('N3');
+    expect(readReplyValue({ segments: [], tip: 'x', tipLevel: '級外' }).tipLevel).toBe('級外');
+    expect(readReplyValue({ segments: [], tip: '', tipLevel: '' }).tipLevel).toBeUndefined();
+    expect(readReplyValue({ segments: [], tip: 'x', tipLevel: 'N6' }).tipLevel).toBeUndefined();
+    expect(readReplyValue({ segments: [], tip: 'x', tipLevel: 5 }).tipLevel).toBeUndefined();
+    expect(readReplyValue({ segments: [], tip: 'x' })).not.toHaveProperty('tipLevel');
+  });
 });
 
 describe('displayOf: the text shown', () => {
@@ -70,6 +78,11 @@ describe('canonicalReplyJson: the one stored form', () => {
     expect(canonicalReplyJson({ segments: [{ lang: 'ja', text: 'はい', gloss: '好' }], tip: '', tone: 'happy' }))
       .toBe('{"segments":[{"lang":"ja","text":"はい","gloss":"好"}],"tip":"","tone":"happy"}');
     expect(canonicalReplyJson({ segments: [], tip: 'x' })).toBe('{"segments":[],"tip":"x"}');
+  });
+  it('the tip level sits after the tip, and is left out when there is none', () => {
+    expect(canonicalReplyJson({ segments: [], tip: 'x', tipLevel: 'N5', tone: 'happy' }))
+      .toBe('{"segments":[],"tip":"x","tipLevel":"N5","tone":"happy"}');
+    expect(canonicalReplyJson({ segments: [], tip: '', tone: 'happy' })).toBe('{"segments":[],"tip":"","tone":"happy"}');
   });
   it('is stable: canonicalising the canonical form gives the same text', () => {
     const once = canonicalReplyJson({ segments: [{ lang: 'ja', text: '学校', gloss: '學校' }], tip: '要說 <ja>学校</ja>', tone: 'explain' });

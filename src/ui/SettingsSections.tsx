@@ -14,6 +14,7 @@ import {
   BACKGROUND_ACCEPT, backgroundRefusal, clearBackgroundPicture, prepareBackground, saveBackgroundPicture, useBackgroundUrl,
 } from '../game/tutorBackground';
 import { DEFAULT_SCENE, DIM_MAX, isBuiltinBackground, newBackgroundId } from '../game/tutorScene';
+import { useSheetKeyboard } from './useSheetKeyboard';
 import { getTtsSettings, onTtsSettings, setTtsSettings, ttsAvailable, type TtsSettings } from '../game/tts';
 import { CHAT_MODEL_CHOICES, PERSONA_MAX_CHARS, PROVIDERS_MAX, PROVIDER_LABELS, chatModelLabel, clipCodePoints, type ChatModelId, type ProviderId } from '../game/claudeProtocol';
 import { logoutChatGpt, startChatGptLogin, type ChatGptStatus } from '../game/openaiStatus';
@@ -43,14 +44,20 @@ export function useSoundSettings() {
 export function SettingsSheet({ onClose, children, theme, title = '設定' }: {
   onClose: () => void; children: ReactNode; theme?: 'dark'; title?: string;
 }) {
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  // the name / persona fields: the sheet stays put, its body ends above the keyboard, the page never slides
+  const keyboard = useSheetKeyboard(backdropRef, sheetRef, { body: bodyRef });
   return (
-    <div className={theme === 'dark' ? 'sheet-backdrop sheet-dark' : 'sheet-backdrop'} onClick={onClose}>
-      <section className="sheet as-settings" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={title}>
+    <div ref={backdropRef} className={theme === 'dark' ? 'sheet-backdrop sheet-dark' : 'sheet-backdrop'} onClick={onClose}>
+      <section ref={sheetRef} className="sheet as-settings" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={title}
+        onFocus={keyboard.onFocus} onBlur={keyboard.onBlur}>
         <div className="sheet-head">
           <strong>{title}</strong>
           <button className="sheet-close" onClick={onClose} aria-label="關閉"><IconClose /></button>
         </div>
-        <div className="as-settings-body">{children}</div>
+        <div ref={bodyRef} className="as-settings-body">{children}</div>
       </section>
     </div>
   );

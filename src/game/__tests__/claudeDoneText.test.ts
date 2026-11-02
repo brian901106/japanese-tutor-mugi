@@ -54,6 +54,17 @@ describe('askClaude: the done text is the reply as shown', () => {
     expect(r.tipJa).toEqual(['学校[がっこう]に行[い]きました', 'に']);
   });
 
+  it('the tip level of the done text comes back with the tip (not in the stored form); an invalid level is dropped', async () => {
+    const tip = '要說 <ja>学校[がっこう]に行[い]きました</ja>。';
+    const seg = '"segments":[{"lang":"ja","text":"学校[がっこう]に行[い]きました","gloss":"去了學校"}]';
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(sse(streamedJa) + done(`{${seg},"tip":"${tip}","tipLevel":"N5","tone":"happy"}`), { status: 200 })));
+    const r = await askClaude(teacher);
+    expect(r.tipLevel).toBe('N5');
+    expect(r.sent).not.toContain('tipLevel');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(sse(streamedJa) + done(`{${seg},"tip":"${tip}","tipLevel":"","tone":"happy"}`), { status: 200 })));
+    expect((await askClaude(teacher)).tipLevel).toBeUndefined();
+  });
+
   it('a tip missing from the done text leaves no tip, even though the stream had one', async () => {
     const streamedTip = '{"segments":[{"lang":"ja","text":"そうなんだ！","gloss":""}],"tip":"學校に行きました","tone":"happy"}';
     const doneNoTip = '{"segments":[{"lang":"ja","text":"そうなんだ！","gloss":""}],"tip":"","tone":"happy"}';

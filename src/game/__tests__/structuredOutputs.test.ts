@@ -43,9 +43,11 @@ describe('schemas are valid for Structured Outputs', () => {
   it('JUDGE_SCHEMA', () => checkSchema(JUDGE_SCHEMA, 'JUDGE'));
   it('LOOKUP_SCHEMA', () => checkSchema(LOOKUP_SCHEMA, 'LOOKUP'));
   it('TIP_FIX_SCHEMA', () => checkSchema(TIP_FIX_SCHEMA, 'TIP_FIX'));
-  it('CHAT_REPLY_SCHEMA (her reply: segments, tip, tone)', () => {
+  it('CHAT_REPLY_SCHEMA (her reply: segments, tip, tipLevel, tone)', () => {
     checkSchema(CHAT_REPLY_SCHEMA, 'CHAT');
-    expect(CHAT_REPLY_SCHEMA.required).toEqual(['segments', 'tip', 'tone']);
+    expect(CHAT_REPLY_SCHEMA.required).toEqual(['segments', 'tip', 'tipLevel', 'tone']);
+    // '' for no tip; the JLPT levels and 級外 otherwise (the same names as the lookup's levels)
+    expect(CHAT_REPLY_SCHEMA.properties.tipLevel.enum).toEqual(['', 'N5', 'N4', 'N3', 'N2', 'N1', '級外']);
     expect(CHAT_REPLY_SCHEMA.properties.tone.enum).toEqual([...CHAT_TONES]);
     expect(CHAT_REPLY_SCHEMA.properties.segments.items.properties.lang.enum).toEqual(['ja', 'zh']);
   });

@@ -2,6 +2,7 @@
 // say it (練習: the mic, judged by game/tipsJudge) or type it, until it is right; right ones move to 已學會.
 import { useEffect, useRef, useState } from 'react';
 import { loadTips, onTips, removeTip, updateTip, type TipEntry } from '../game/tipsBook';
+import { levelBadge } from '../game/lookup';
 import { judgeSaid } from '../game/tipsJudge';
 import { aiServicesOf, loadTutor } from '../game/tutor';
 import { speakReply, stopSpeaking } from '../game/tts';
@@ -88,7 +89,7 @@ export function TipsSheet(props: { onClose: () => void; theme?: 'dark' }) {
     const listeningHere = practice?.id === e.id;
     return (
       <li key={e.id} className={`tip-card${e.mastered ? ' done' : ''}`}>
-        <p className="tip-text">{rubyNodes(e.text)}</p>
+        <p className="tip-text">{rubyNodes(e.text)}{e.level && <span className="lk-badge" data-level={e.level}>{levelBadge(e.level)}</span>}</p>
         {e.targets.length > 0 && (
           <div className="tip-targets" role="group" aria-label="練習的句子">
             {e.targets.map((t, i) => (

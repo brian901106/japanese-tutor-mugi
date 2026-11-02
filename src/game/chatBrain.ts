@@ -2,6 +2,7 @@
 // (game/claudeBrain.ts); replyWithFallback is kept so another brain can be chained in front of it later.
 import type { ChatLine, Tone } from './chatTypes';
 import type { ChatContext, ChatModeId, ChatRoleId } from './claudeProtocol';
+import type { LookupLevel } from './lookup';
 import { claudeBrain } from './claudeBrain';
 
 /** `tone`: how she says it, read from her meta tag. */
@@ -29,6 +30,8 @@ export type BrainReplyFull = BrainReply & {
   /** 小提醒 (teacher mode): its own line, never voiced */
   tip?: string;
   tipJa?: string[];
+  /** the JLPT level of the tip's Japanese (the 小提醒 badge); undefined when there is none */
+  tipLevel?: LookupLevel;
   tipRaw?: string;
   tipRewrite?: boolean;
   /** her reply as it is stored and sent back to Claude (the reply JSON, see game/replyJson.ts) */

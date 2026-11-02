@@ -3,6 +3,7 @@
 // (the book just lives in memory for the session).
 
 import { stripRuby } from './furigana';
+import type { LookupLevel } from './lookup';
 
 export type TipEntry = {
   id: string;
@@ -10,6 +11,8 @@ export type TipEntry = {
   text: string;
   /** the Japanese targets written inside the tip */
   targets: string[];
+  /** the JLPT level of the targets (the badge); undefined for old entries and tips with none */
+  level?: LookupLevel;
   /** what the player said that triggered the tip */
   said?: string;
   /** the character (role) who gave the tip */

@@ -1,17 +1,21 @@
 // Her reply as JSON (game/claudeProtocol.ts ChatReplyJson): the pure helpers the server (server/claudeChat.ts, server/replyFix.ts)
-// and the client (game/claudeBrain.ts) share. No network, no DOM, no storage; the only import is the tone vocabulary.
+// and the client (game/claudeBrain.ts) share. No network, no DOM, no storage; the imports are the tone vocabulary and the JLPT levels.
 //   - parsePartialJson reads a JSON text that may be cut anywhere (the stream while it arrives, a truncated reply);
 //   - readReplyValue takes the fields out of whatever that read gives, with each field's type checked;
 //   - canonicalReplyJson writes the one canonical form (fixed key order, no spaces): what is stored and sent back to Claude.
 import { CHAT_TONES, type ChatReplyJson, type ChatSegment } from './claudeProtocol.ts';
+import { LOOKUP_LEVELS, type LookupLevel } from './lookup.ts';
 
 /** a tone of her reply (the vocabulary of CHAT_TONES) */
 type ChatTone = (typeof CHAT_TONES)[number];
 
 /** A segment as it reads: lang is undefined until the key has come (or when it is not 'ja' / 'zh'). */
 export type ReplySegment = { lang?: 'ja' | 'zh'; text: string; gloss: string };
-/** The fields of a reply as they read. tip is '' when there is none; tone is undefined until it has come. */
-export type ReplyFields = { segments: ReplySegment[]; tip: string; tone?: ChatTone };
+/**
+ * The fields of a reply as they read. tip is '' when there is none; tone is undefined until it has come. tipLevel is the
+ * JLPT level of the tip's Japanese: undefined when there is none or it is not a level ('' and unknown values are dropped).
+ */
+export type ReplyFields = { segments: ReplySegment[]; tip: string; tipLevel?: LookupLevel; tone?: ChatTone };
 
 /** Where a JSON text stands: whether its first top-level array (the segments) has closed. Structure only, nothing is validated. */
 export function scanJson(text: string): { arrayClosed: boolean } {
@@ -97,7 +101,8 @@ export function readReplyValue(value: unknown): ReplyFields {
     return { lang, text: typeof x.text === 'string' ? x.text : '', gloss: typeof x.gloss === 'string' ? x.gloss : '' };
   });
   const tone = typeof o.tone === 'string' && (CHAT_TONES as readonly string[]).includes(o.tone) ? (o.tone as ChatTone) : undefined;
-  return { segments, tip: typeof o.tip === 'string' ? o.tip : '', tone };
+  const tipLevel = typeof o.tipLevel === 'string' && (LOOKUP_LEVELS as readonly string[]).includes(o.tipLevel) ? (o.tipLevel as LookupLevel) : undefined;
+  return { segments, tip: typeof o.tip === 'string' ? o.tip : '', ...(tipLevel ? { tipLevel } : {}), tone };
 }
 
 /** The segments that can be kept: a language, and some text. */
@@ -117,11 +122,15 @@ export function displayOf(segments: ReplySegment[]): string {
   return segments.map((s) => (s.lang !== 'zh' && s.text && s.gloss ? `${s.text}（${s.gloss}）` : s.text)).join('');
 }
 
-/** The canonical JSON of a reply: fixed key order (segments, tip, tone; lang, text, gloss), no spaces. Stored and sent back as is. */
+/**
+ * The canonical JSON of a reply: fixed key order (segments, tip, tipLevel, tone; lang, text, gloss), no spaces. Stored and sent
+ * back as is. tipLevel is written only when there is one, so a reply without it keeps its old form.
+ */
 export function canonicalReplyJson(r: ChatReplyJson): string {
   return JSON.stringify({
     segments: r.segments.map((s) => ({ lang: s.lang, text: s.text, gloss: s.gloss })),
     tip: r.tip,
+    ...(r.tipLevel ? { tipLevel: r.tipLevel } : {}),
     tone: r.tone,
   });
 }

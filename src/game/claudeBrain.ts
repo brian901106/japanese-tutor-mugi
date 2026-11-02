@@ -5,6 +5,7 @@
 import { apiFetch } from './apiFetch';
 import type { ChatBrain } from './chatBrain';
 import type { ChatLine, Tone } from './chatTypes';
+import type { LookupLevel } from './lookup';
 import {
   CHAT_HISTORY_LINES, CHAT_HISTORY_MAX, CHAT_IDLE_KEEP, CHAT_IDLE_RESET_MS, CHAT_MAX_MESSAGE_CHARS,
   userTurn, type ChatContext, type ChatModeId, type ChatRoleId,
@@ -31,6 +32,8 @@ export type ClaudeReply = {
   tip?: string;
   /** the Japanese targets written inside the tip (for practice); undefined when there are none */
   tipJa?: string[];
+  /** the JLPT level of the Japanese the tip teaches (the 小提醒 badge); undefined when the tip has none */
+  tipLevel?: LookupLevel;
   /** the tip as the server wrote it, with its <ja> tags (for the background rewrite); set only with tipRewrite */
   tipRaw?: string;
   /** the tip has Japanese prose outside <ja>: the server asks for a background rewrite (reviseTip), once */
@@ -181,6 +184,7 @@ function viewOf(f: ReplyFields, mode: ChatModeId, tipRewrite: boolean): ClaudeRe
     spoken,
     tip: tip || undefined,
     tipJa: targets.length ? targets : undefined,
+    tipLevel: tip && f.tipLevel ? f.tipLevel : undefined,
     tipRaw: rewrite ? f.tip.trim() : undefined,
     tipRewrite: rewrite ? true : undefined,
     tone: f.tone,
@@ -530,7 +534,7 @@ export const claudeBrain: ChatBrain = {
     }, req.signal);
     return {
       text: c.text, tone: c.tone,
-      spoken: c.spoken, segments: c.segments, tip: c.tip, tipJa: c.tipJa, tipRaw: c.tipRaw, tipRewrite: c.tipRewrite, sent: c.sent,
+      spoken: c.spoken, segments: c.segments, tip: c.tip, tipJa: c.tipJa, tipLevel: c.tipLevel, tipRaw: c.tipRaw, tipRewrite: c.tipRewrite, sent: c.sent,
     };
   },
 };

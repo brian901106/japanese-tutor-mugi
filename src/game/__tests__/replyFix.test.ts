@@ -72,6 +72,16 @@ describe('fixReplyJson: the reply as it is shown and stored', () => {
     expect((await fixReplyJson(raw)).json).toBe(raw);
   });
 
+  it('the tip level is kept with its tip; an invalid level is left out, and no tip means no level', async () => {
+    const tip = '要說 <ja>学校[がっこう]に行[い]きました</ja>。';
+    const ok = await fixReplyJson(`{"segments":[],"tip":"${tip}","tipLevel":"N5","tone":"happy"}`);
+    expect(JSON.parse(ok.json)).toEqual({ segments: [], tip, tipLevel: 'N5', tone: 'happy' });
+    const bad = await fixReplyJson(`{"segments":[],"tip":"${tip}","tipLevel":"N9"}`);
+    expect(JSON.parse(bad.json)).toEqual({ segments: [], tip });
+    const none = await fixReplyJson('{"segments":[],"tip":"","tipLevel":"N5"}');
+    expect(none.json).toBe('{"segments":[],"tip":""}');
+  });
+
   it('an invalid tone is left out, the rest is kept', async () => {
     const out = await fixReplyJson('{"segments":[{"lang":"ja","text":"はい","gloss":"好"}],"tip":"","tone":"explode"}');
     expect(out.json).toBe('{"segments":[{"lang":"ja","text":"はい","gloss":"好"}],"tip":""}');

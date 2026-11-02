@@ -38,8 +38,14 @@ describe('teacher reminder: readings and no 小提醒 label', () => {
 describe('teacher prompts describe the JSON reply, with no tags to write', () => {
   it('the system prompt names the three fields and says lang is ja, gloss is the Chinese meaning', () => {
     const p = systemPrompt('Mugi');
-    for (const word of ['segments', 'tip', 'tone', 'lang', 'gloss']) expect(p).toContain(word);
+    for (const word of ['segments', 'tip', 'tipLevel', 'tone', 'lang', 'gloss']) expect(p).toContain(word);
     expect(p).toContain('"ja"');
+  });
+  it('the system prompt says what tipLevel is: the JLPT level of the tip, 級外 for the rest, \'\' with no tip', () => {
+    const p = systemPrompt('Mugi');
+    expect(p).toContain('tipLevel：tip 裡教的日文');
+    expect(p).toContain('只能是 N5、N4、N3、N2、N1 或 級外');
+    expect(p).toContain('四個欄位');
   });
   it('the system prompt asks for no <meta> or <tip> tags in the reply (the tip keeps its <ja> inside the string)', () => {
     const p = systemPrompt('Mugi');
@@ -50,9 +56,10 @@ describe('teacher prompts describe the JSON reply, with no tags to write', () =>
     const r = reminderPrompt();
     const example = /\{"segments":.*"tone":"happy"\}/.exec(r)?.[0] ?? '';
     expect(example).not.toBe('');
-    const parsed = JSON.parse(example) as { segments: { lang: string; text: string; gloss: string }[]; tip: string; tone: string };
+    const parsed = JSON.parse(example) as { segments: { lang: string; text: string; gloss: string }[]; tip: string; tipLevel: string; tone: string };
     expect(parsed.segments[0].lang).toBe('ja');
     expect(parsed.tip).toContain('<ja>');
     expect(parsed.tone).toBe('happy');
+    expect(parsed.tipLevel).toBe('N5');
   });
 });

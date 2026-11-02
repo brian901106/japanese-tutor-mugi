@@ -44,6 +44,18 @@ describe('tipsBook storage', () => {
     expect(loadTips()).toEqual([e]);
   });
 
+  it('stores the JLPT level of the tip, and an entry saved before levels existed still loads (no level)', () => {
+    const e = addTip({ ...base, level: 'N4' });
+    expect(e!.level).toBe('N4');
+    expect(loadTips()[0].level).toBe('N4');
+    const old = { id: 'old', text: '要說 学校', targets: ['学校'], role: 'Mugi', at: 1, tries: 0, mastered: false };
+    store.m.set(TIPS_KEY, JSON.stringify([old]));
+    resetTipsCacheForTest();
+    const loaded = loadTips();
+    expect(loaded).toHaveLength(1);
+    expect(loaded[0].level).toBeUndefined();
+  });
+
   it('newest first, and ids are distinct', () => {
     const a = addTip({ ...base, text: 'A' })!;
     const b = addTip({ ...base, text: 'B' })!;

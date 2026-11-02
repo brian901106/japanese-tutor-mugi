@@ -228,10 +228,10 @@ export default function TutorView() {
       const { reply: c } = await replyWithFallback(fallbackChain(), { history, situation: ctx, mode: 'teacher', role: CHAT_ROLE, onDelta: (t) => setStreamText(t) });
       setStreamText('');
       const tipT = Date.now();
-      const tipEntry = c.tip ? addTip({ text: c.tip, targets: c.tipJa ?? [], said: text, role: CHAT_ROLE }) : null;
+      const tipEntry = c.tip ? addTip({ text: c.tip, targets: c.tipJa ?? [], level: c.tipLevel, said: text, role: CHAT_ROLE }) : null;
       // her line keeps the reply as it is sent back to Claude (its JSON, tip left out: sent)
       const her: ChatLine = { from: 'her', text: c.text, t: Date.now(), sent: c.sent, pk: key };
-      const tipLine: ChatLine[] = c.tip ? [{ from: 'her', text: c.tip, t: tipT, tip: true, pk: key }] : [];
+      const tipLine: ChatLine[] = c.tip ? [{ from: 'her', text: c.tip, t: tipT, tip: true, pk: key, tipLevel: c.tipLevel }] : [];
       setChat((cur) => [...cur, her, ...tipLine].slice(-TUTOR_CHAT_KEEP));
       // a tip with Japanese prose is shown as it is, then rewritten in the background
       if (c.tip && c.tipRewrite && c.tipRaw) {

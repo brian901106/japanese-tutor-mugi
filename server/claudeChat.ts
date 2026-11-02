@@ -391,13 +391,14 @@ export function upstreamMessages(messages: ChatMessage[]): BetaMessageStreamPara
 /**
  * Her chat reply (Structured Outputs): the API guarantees this shape. The reply is streamed as its JSON text and read on the
  * client while it arrives (game/claudeBrain.ts ReplyJsonParser). segments: her Japanese in order, each with its Chinese
- * gloss (lang is 'ja' in the teacher mode); tip: a Chinese 小提醒, '' for none; tone: how she says it. The schema is a
- * constant, so the request prefix (system block) stays byte-identical for the prompt cache.
+ * gloss (lang is 'ja' in the teacher mode); tip: a Chinese 小提醒, '' for none; tipLevel: the JLPT level of the Japanese the
+ * tip teaches ('' for none); tone: how she says it. The schema is a constant, so the request prefix (system block) stays
+ * byte-identical for the prompt cache.
  */
 export const CHAT_REPLY_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['segments', 'tip', 'tone'],
+  required: ['segments', 'tip', 'tipLevel', 'tone'],
   properties: {
     segments: {
       type: 'array',
@@ -413,6 +414,7 @@ export const CHAT_REPLY_SCHEMA = {
       },
     },
     tip: { type: 'string' },
+    tipLevel: { type: 'string', enum: ['', 'N5', 'N4', 'N3', 'N2', 'N1', '級外'] },
     tone: { type: 'string', enum: [...CHAT_TONES] },
   },
 } as const;
