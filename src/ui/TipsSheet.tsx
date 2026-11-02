@@ -81,7 +81,7 @@ export function TipsSheet(props: { onClose: () => void; theme?: 'dark' }) {
 
   const demo = (target: string) => {
     if (mic.listening) mic.stop();
-    speakReply(stripRuby(target)); // the readings are for display only
+    speakReply(stripRuby(target), 'ja'); // the readings are for display only; always Japanese (kanji-only words too)
   };
 
   const learned = tips.filter((t) => t.mastered);

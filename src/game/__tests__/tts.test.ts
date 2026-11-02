@@ -138,6 +138,13 @@ describe('createReplyVoice (reply bus → queue, lang routing)', () => {
   });
   afterEach(() => { on = true; });
 
+  it('a known language wins over detection: kanji-only Japanese (速查 勉強) reads as Japanese', () => {
+    voice({ type: 'start', id: 1 });
+    voice({ type: 'delta', id: 1, text: '勉強', lang: 'ja' });
+    voice({ type: 'done', id: 1, text: '勉強' });
+    expect(queued).toEqual([{ text: '勉強', lang: 'ja' }]);
+  });
+
   it('queues sentences as the deltas stream in, and flushes the tail on done', () => {
     voice({ type: 'start', id: 1 });
     voice({ type: 'delta', id: 1, text: '你好。我' });

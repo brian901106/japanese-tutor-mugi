@@ -61,7 +61,7 @@ export function LookupSheet(props: { onClose: () => void; ready: boolean; theme?
   /** hear a Japanese line (readings and tags are not spoken) */
   const say = (ja: string) => {
     if (mic.listening) mic.stop();
-    speakReply(jaSpeakable(ja));
+    speakReply(jaSpeakable(ja), 'ja'); // always Japanese: a kanji-only word must not read as Chinese
   };
 
   const clear = () => setEntries(clearLookups());

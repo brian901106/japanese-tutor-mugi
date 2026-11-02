@@ -507,11 +507,12 @@ export function setSpeakerVoice(plan: SpeakPlan | null) {
 
 const replyVoice = createReplyVoice(queue, ttsActive, () => speakerNow);
 
-/** speak a whole reply that is already known (typed chat, tap lines): emitted on the reply bus like a streamed one */
-export function speakReply(text: string) {
+/** speak a whole reply that is already known (typed chat, tap lines): emitted on the reply bus like a streamed one. `lang`:
+ *  the language when it is known (速查, 小提醒: Japanese of kanji only, like 勉強, would read as Chinese); else per sentence */
+export function speakReply(text: string, lang?: Lang) {
   const id = nextReplyId();
   emitReply({ type: 'start', id });
-  emitReply({ type: 'delta', id, text });
+  emitReply({ type: 'delta', id, text, ...(lang ? { lang } : {}) });
   emitReply({ type: 'done', id, text });
 }
 
