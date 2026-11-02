@@ -62,6 +62,10 @@
    keeps the bubble clear of them (one note about two lines tall, it wraps on a phone; a second one adds more). No notes, no change. */
 .tutor-stage:has(~ .chat-dock .as-mic-note) { margin-bottom: calc(env(safe-area-inset-bottom) + 10px + 54px + 58px); }
 .tutor-stage:has(~ .chat-dock .as-mic-note + .as-mic-note) { margin-bottom: calc(env(safe-area-inset-bottom) + 10px + 54px + 98px); }
+/* the 語音對話 pill (about 52px with its stop button) stacks above the bar the same way: the bubble moves up over it */
+.tutor-stage:has(~ .chat-dock .as-voice-pill) { margin-bottom: calc(env(safe-area-inset-bottom) + 10px + 54px + 62px); }
+.tutor-stage:has(~ .chat-dock .as-voice-pill + .as-mic-note) { margin-bottom: calc(env(safe-area-inset-bottom) + 10px + 54px + 62px + 58px); }
+.tutor-stage:has(~ .chat-dock .as-voice-pill + .as-mic-note + .as-mic-note) { margin-bottom: calc(env(safe-area-inset-bottom) + 10px + 54px + 62px + 98px); }
 /* the figure's height: the stage's, or the width's worth of it (--hw = figure h / w, set from tutor.json), whichever is less;
    the width follows from the aspect ratio, so the body is never stretched */
 .tutor-portrait {
